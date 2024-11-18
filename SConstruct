@@ -41,7 +41,8 @@ env.Append(
             "DISABLE_DEPRECATED": "1",
             "DISABLE_AUTOLOAD": "1",
             "WITH_C_LOADER": "0",
-            "WITH_MULTITHREAD_CHECKS": "0"
+            "WITH_MULTITHREAD_CHECKS": "0",
+            "WITH_SYSTEM_EXTRAS": "0"
             }
         )
 sources = [
