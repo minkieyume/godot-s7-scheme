@@ -5,7 +5,7 @@ import sys
 from methods import print_error
 
 
-libname = "EXTENSION-NAME"
+libname = "godot-s7-scheme"
 projectdir = "demo"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
@@ -36,19 +36,19 @@ Run the following command to download godot-cpp:
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
 
 env.Append(
-        CPPPATH=["src/", "s7/"],
-        CPPDEFINES={
-            "DISABLE_DEPRECATED": "1",
-            "DISABLE_AUTOLOAD": "1",
-            "WITH_C_LOADER": "0",
-            "WITH_MULTITHREAD_CHECKS": "0",
-            "WITH_SYSTEM_EXTRAS": "0"
-            }
-        )
+    CPPPATH=["src/", "s7/"],
+    CPPDEFINES={
+        "DISABLE_DEPRECATED": "1",
+        "DISABLE_AUTOLOAD": "1",
+        "WITH_C_LOADER": "0",
+        "WITH_MULTITHREAD_CHECKS": "0",
+        "WITH_SYSTEM_EXTRAS": "0"
+    }
+)
 sources = [
-        Glob("src/*.cpp"),
-        Glob("s7/s7.c")
-        ]
+    Glob("src/*.cpp"),
+    Glob("s7/s7.c")
+]
 
 if env["target"] in ["editor", "template_debug"]:
     try:
