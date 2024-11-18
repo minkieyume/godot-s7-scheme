@@ -2,3 +2,6 @@
 	path = godot-cpp
 	url = https://github.com/godotengine/godot-cpp.git
 	branch = 4.0
+[submodule "s7"]
+	path = s7
+	url = https://github.com/bamboo/s7.git
