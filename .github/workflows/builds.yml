@@ -293,7 +293,7 @@ jobs:
           use-dotnet: false
       - name: Test
         if: ${{ matrix.float-precision == 'single' && matrix.target-type == 'template_debug' && (matrix.platform == 'linux' || matrix.platform == 'macos' || matrix.platform == 'windows') }}
-        run: make test
+        run: make test -j
 
 # Sign
       - name: Mac Sign
