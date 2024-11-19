@@ -107,4 +107,4 @@
 		(let ((p (current-error-port)))
 			(apply format p info)
 			(format p "~%"))
-		(exit 1))))
+		(exit 1)))
