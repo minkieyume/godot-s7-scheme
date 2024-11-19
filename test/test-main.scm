@@ -18,7 +18,7 @@
     (call-with-output-file output-file
       (lambda (p) (write-string (godot scene) p)))
     (unless (= 0 (system (format #f "diff --color=auto -u ~a ~a" golden-file output-file)))
-      (error 'assertion-error scene))))
+      (error 'assertion-error "ERROR: output of scene `~a` doesn't match golden file `~a`." scene golden-file))))
 
 (define (golden-scene-tests)
   (golden-scene-test
@@ -95,6 +95,16 @@
    "42"
    "42"))
 
-(repl-unit-tests)
-(golden-scene-tests)
-(format #t "✓ ok~%")
+(define (all-tests)
+	(repl-unit-tests)
+	(golden-scene-tests))
+
+(catch #t
+	(lambda ()
+		(all-tests)
+		(format #t "✓ ok~%"))
+	(lambda (type info)
+		(let ((p (current-error-port)))
+			(apply format p info)
+			(format p "~%"))
+		(exit 1))))
