@@ -284,6 +284,17 @@ jobs:
           float-precision: ${{ matrix.float-precision }}
           build-target-type: ${{ matrix.target-type }}
 
+# Test
+      - name: Setup Godot Action
+        if: ${{ matrix.platform == 'linux' }}
+        uses: chickensoft-games/setup-godot@v2.1.1
+        with:
+          version: 4.3.0
+          use-dotnet: false
+      - name: Test
+        if: ${{ matrix.platform == 'linux' }}
+        run: make test
+
 # Sign
       - name: Mac Sign
         # Disable sign if secrets are not set
