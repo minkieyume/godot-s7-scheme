@@ -28,7 +28,7 @@ public:
 	void set_scheme_script(const Ref<SchemeScript> &p_scheme_script);
 	[[nodiscard]] Ref<SchemeScript> get_scheme_script() const { return scheme_script; };
 
-	[[nodiscard]] const s7 &get_s7() const { return s7; }
+	[[nodiscard]] const s7 &get_s7() const { return scheme; }
 
 protected:
 	static void _bind_methods();
@@ -37,7 +37,7 @@ private:
 	TypedArray<SchemeScript> prelude;
 	Ref<SchemeScript> scheme_script;
 	s7_protected_ptr _process_symbol;
-	s7 s7;
+	s7 scheme;
 };
 
 } // namespace godot

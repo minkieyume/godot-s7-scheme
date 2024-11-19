@@ -5,9 +5,9 @@
 using namespace godot;
 
 Scheme::Scheme() {
-  define_variant_ffi(s7);
-  auto node = make_variant_object(s7.get(), this);
-  s7.define_constant_with_documentation("*node*", node, "this Godot node");
+  define_variant_ffi(scheme);
+  auto node = make_variant_object(scheme.get(), this);
+  scheme.define_constant_with_documentation("*node*", node, "this Godot node");
 }
 
 Scheme::~Scheme() { _process_symbol = nullptr; }
@@ -16,7 +16,7 @@ void Scheme::define(
     const godot::String &name,
     const godot::Variant &value,
     const String &help) const {
-  s7.define(name.utf8(), variant_to_scheme(s7.get(), value), help.utf8());
+  scheme.define(name.utf8(), variant_to_scheme(scheme.get(), value), help.utf8());
 }
 
 void Scheme::set_scheme_script(const Ref<godot::SchemeScript> &p_scheme_script) {
@@ -41,7 +41,7 @@ void Scheme::_ready() {
 
   load(scheme_script.ptr());
 
-  _process_symbol = s7.make_symbol("_process");
+  _process_symbol = scheme.make_symbol("_process");
   set_process(true);
 }
 
@@ -50,24 +50,24 @@ void Scheme::load(const godot::SchemeScript *script) const {
 }
 
 void Scheme::load_string(const String &code) const {
-  s7.load_string(code);
+  scheme.load_string(code);
 }
 
 void Scheme::_process(double delta) {
   if (_process_symbol) {
-    s7.call(_process_symbol.get(), delta);
+    scheme.call(_process_symbol.get(), delta);
   }
 }
 
 void Scheme::_exit_tree() {
   if (_process_symbol) {
-    auto res = s7.call_optional("_exit_tree");
+    auto res = scheme.call_optional("_exit_tree");
   }
   Node::_exit_tree();
 }
 
 Variant Scheme::eval(const String &code) {
-  return scheme_to_variant(s7.get(), s7.eval(code));
+  return scheme_to_variant(scheme.get(), scheme.eval(code));
 }
 
 s7_pointer array_to_list(s7_scheme *sc, const Array &array) {
@@ -81,7 +81,7 @@ s7_pointer array_to_list(s7_scheme *sc, const Array &array) {
 }
 
 Variant Scheme::apply(const String &symbol, const Array &args) const {
-  auto sc = s7.get();
+  auto sc = scheme.get();
   auto func = s7_name_to_value(sc, symbol.utf8().ptr());
   auto scheme_args = array_to_list(sc, args);
   return scheme_to_variant(sc,
