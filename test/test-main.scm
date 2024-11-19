@@ -102,9 +102,10 @@
 (catch #t
 	(lambda ()
 		(all-tests)
-		(format #t "✓ ok~%"))
+		(format #t "✅ Passed~%"))
 	(lambda (type info)
 		(let ((p (current-error-port)))
+			(format p "❌ ")
 			(apply format p info)
 			(format p "~%"))
 		(exit 1)))
