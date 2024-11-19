@@ -6,7 +6,7 @@ on:
   merge_group:
 
 env:
-  LIBNAME: example
+  LIBNAME: godot-s7-scheme
 
 jobs:
   build:
