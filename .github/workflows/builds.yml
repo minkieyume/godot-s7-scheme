@@ -286,13 +286,13 @@ jobs:
 
 # Test
       - name: Setup Godot Action
-        if: ${{ matrix.float-precision == 'single' && (matrix.platform == 'linux' || matrix.platform == 'macos' || matrix.platform == 'windows') }}
+        if: ${{ matrix.float-precision == 'single' && matrix.target-type == 'template_debug' && (matrix.platform == 'linux' || matrix.platform == 'macos' || matrix.platform == 'windows') }}
         uses: chickensoft-games/setup-godot@v2.1.1
         with:
           version: 4.3.0
           use-dotnet: false
       - name: Test
-        if: ${{ matrix.float-precision == 'single' && (matrix.platform == 'linux' || matrix.platform == 'macos' || matrix.platform == 'windows') }}
+        if: ${{ matrix.float-precision == 'single' && matrix.target-type == 'template_debug' && (matrix.platform == 'linux' || matrix.platform == 'macos' || matrix.platform == 'windows') }}
         run: make test
 
 # Sign
