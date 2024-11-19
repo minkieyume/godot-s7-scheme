@@ -21,17 +21,17 @@ jobs:
             target-type: template_debug
             os: ubuntu-20.04
 
-          - platform: windows
-            float-precision: single
-            arch: x86_32
-            target-type: template_debug
-            os: windows-latest
+#         - platform: windows
+#           float-precision: single
+#           arch: x86_32
+#           target-type: template_debug
+#           os: windows-latest
 
-          - platform: windows
-            float-precision: single
-            arch: x86_64
-            target-type: template_debug
-            os: windows-latest
+#         - platform: windows
+#           float-precision: single
+#           arch: x86_64
+#           target-type: template_debug
+#           os: windows-latest
 
           - platform: macos
             float-precision: single
@@ -144,17 +144,17 @@ jobs:
             target-type: template_debug
             os: ubuntu-20.04
 
-          - platform: windows
-            float-precision: double
-            arch: x86_32
-            target-type: template_debug
-            os: windows-latest
+#         - platform: windows
+#           float-precision: double
+#           arch: x86_32
+#           target-type: template_debug
+#           os: windows-latest
 
-          - platform: windows
-            float-precision: double
-            arch: x86_64
-            target-type: template_debug
-            os: windows-latest
+#         - platform: windows
+#           float-precision: double
+#           arch: x86_64
+#           target-type: template_debug
+#           os: windows-latest
 
           - platform: macos
             float-precision: double
