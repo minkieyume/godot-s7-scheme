@@ -1,6 +1,6 @@
 
 #include "s7.hpp"
-#include "debug_macros.h"
+#include "debug_macros.hpp"
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <mutex>
 #include <vector>

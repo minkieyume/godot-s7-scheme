@@ -1,4 +1,4 @@
-#include "debug_macros.h"
+#include "debug_macros.hpp"
 
 #if DEBUG_LOG
 

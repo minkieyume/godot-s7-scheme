@@ -1,8 +1,8 @@
-#include "ffi.h"
-#include "debug_macros.h"
-#include "ffi_macros.h"
-#include "scheme_callable.h"
-#include "scheme_object.h"
+#include "ffi.hpp"
+#include "debug_macros.hpp"
+#include "ffi_macros.hpp"
+#include "scheme_callable.hpp"
+#include "scheme_object.hpp"
 
 #include <godot_cpp/classes/performance.hpp>
 #include <godot_cpp/core/class_db.hpp>

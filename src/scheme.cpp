@@ -1,5 +1,5 @@
-#include "scheme.h"
-#include "ffi.h"
+#include "scheme.hpp"
+#include "ffi.hpp"
 #include "godot_cpp/variant/utility_functions.hpp"
 
 using namespace godot;

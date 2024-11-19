@@ -1,5 +1,5 @@
-#include "scheme_script_loader.h"
-#include "scheme_script.h"
+#include "scheme_script_loader.hpp"
+#include "scheme_script.hpp"
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/core/class_db.hpp>
 
