@@ -1,7 +1,10 @@
 .PHONY: test
 
-test: bin/s7
+test: bin/s7 demo/.godot
 	scons && bin/s7 test/test-main.scm
+
+demo/.godot: $(wildcard demo/addons/**) $(wildcard demo/bin/**)
+	godot --path demo --headless --import
 
 bin/s7: s7/s7.c
 	mkdir -p bin
