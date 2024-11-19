@@ -42,7 +42,7 @@ env.Append(
         "WITH_C_LOADER": "0",
         "WITH_MULTITHREAD_CHECKS": "0",
         "WITH_SYSTEM_EXTRAS": "0",
-        "HAVE_COMPLEX_NUMBERS": "0" if env["platform"].startswith("win") else "1"
+        "HAVE_COMPLEX_NUMBERS": "0" if env["platform"] == "windows" else "1"
     }
 )
 
