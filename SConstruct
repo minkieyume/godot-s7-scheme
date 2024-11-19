@@ -34,7 +34,6 @@ Run the following command to download godot-cpp:
     sys.exit(1)
 
 env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
-
 env.Append(
     CPPPATH=["src/", "s7/"],
     CPPDEFINES={
@@ -42,9 +41,11 @@ env.Append(
         "DISABLE_AUTOLOAD": "1",
         "WITH_C_LOADER": "0",
         "WITH_MULTITHREAD_CHECKS": "0",
-        "WITH_SYSTEM_EXTRAS": "0"
+        "WITH_SYSTEM_EXTRAS": "0",
+        "HAVE_COMPLEX_NUMBERS": "0" if env["platform"].startswith("win") else "1"
     }
 )
+
 sources = [
     Glob("src/*.cpp"),
     Glob("s7/s7.c")
