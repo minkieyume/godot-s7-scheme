@@ -85,16 +85,22 @@ Install [Geiser](https://www.nongnu.org/geiser/) then add the following to your 
 
 The Emacs extension automatically recognize Scheme files inside Godot project directories as `Godot s7 Scheme` files.
 
-### Connecting
+### Connecting to the editor
 
-1. Add a `SchemeReplServer` to your scene (preferably as a child of a `Scheme` node) and set its `Auto Start` property to `true`.
+1. Start Godot with `--s7-tcp-port=<port-number>` (and/or `--s7-tcp-address=<bind-address>`).
 2. Check the port number in the Godot output window.
-3. `M-x connect-to-godot-s7`
+3. In Emacs, `M-x connect-to-godot-s7`
+
+### Connecting to a running scene
+
+1. In Godot, select `Debug / Customize Run Instances... / Main Run Args`
+   - Add `--s7-tcp-port=<port-number>` and/or `--s7-tcp-address=<bind-address>`.
+2. Steps 2 and 3 as above.
 
 ## Roadmap
 
 - [x] use Godot API from Scheme
-- [o] live coding interface via Emacs (wip)
+- [x] live coding interface via Emacs
 - [ ] expose tree-sitter API to Scheme
 - [ ] Scheme editor with syntax highlighting
 - [ ] Scheme notebooks
