@@ -2,7 +2,6 @@
 #include "s7.hpp"
 #include "debug_macros.hpp"
 #include <godot_cpp/variant/utility_functions.hpp>
-#include <mutex>
 #include <vector>
 
 class godot::s7_scheme_context {
@@ -71,8 +70,7 @@ s7_pointer s7::define(const char *name, s7_pointer value, const char *help) cons
   return s7_define_variable_with_documentation(sc, name, value, help);
 }
 
-s7_pointer s7::define_constant_with_documentation(
-    const char *name, s7_pointer value, const char *help) const {
+s7_pointer s7::define_constant_with_documentation(const char *name, s7_pointer value, const char *help) const {
   auto sc = get();
   return s7_define_constant_with_documentation(sc, name, value, help);
 }
