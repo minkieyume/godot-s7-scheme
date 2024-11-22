@@ -39,6 +39,10 @@ public:
 		return s7_gc_protected(sc, s7_make_symbol(sc, name));
 	}
 
+  s7_pointer value_of(const s7_protected_ptr& symbol) const {
+    return s7_symbol_value(get(), symbol.get());
+  }
+
 	template <typename S>
 	s7_pointer call_optional(S what) const {
 		auto sc = get();

@@ -1,8 +1,34 @@
 #!/usr/bin/env python
 import os
 import sys
-
 from methods import print_error
+
+def embed_file(target, source, env):
+    """
+    Embeds the content of <source> file into a <target> header file as a const char* constant.
+    """
+    target_path = str(target[0])
+    source_path = str(source[0])
+
+    # Read the content of the source file
+    with open(source_path, 'r') as src_file:
+        file_content = src_file.read()
+
+    # Generate a unique header guard based on the file name
+    target_file_name = os.path.basename(target_path)
+    header_guard = target_file_name.replace('-', '_').replace('.', '_').upper()
+
+    # Write the output header file
+    constant_name = os.path.splitext(target_file_name)[0].replace('-', '_')
+    with open(target_path, 'w') as target_file:
+        target_file.write(f"""
+#ifndef {header_guard}
+#define {header_guard}
+
+const char* {constant_name} = R"({file_content})";
+
+#endif // {header_guard}
+""")
 
 
 libname = "godot-s7-scheme"
@@ -73,5 +99,11 @@ library = env.SharedLibrary(
 
 copy = env.InstallAs("{}/bin/{}/{}lib{}".format(projectdir, env["platform"], filepath, file), library)
 
-default_args = [library, copy]
+embed_scheme_repl = env.Command(
+    target="src/repl/s7_scheme_repl_string.hpp",
+    source="demo/addons/s7/s7_scheme_repl.scm",
+    action=embed_file
+)
+
+default_args = [embed_scheme_repl, library, copy]
 Default(*default_args)
