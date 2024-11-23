@@ -16,7 +16,7 @@ public:
 
 private:
   godot::Ref<godot::TCPServer> server;
-  std::vector<ReplClient> clients;
+  std::vector<ReplConnection> connections;
   ReplRequestCompiler request_compiler;
 };
 #endif

@@ -6,18 +6,18 @@ using gd = godot::UtilityFunctions;
 void ReplMediator::mediate() {
   if (server->is_connection_available()) {
     // TODO: client starts with most recent Scheme node
-    auto client = ReplClient(server->take_connection());
+    auto connection = ReplConnection(server->take_connection());
     gd::print("Scheme repl client connected.");
-    client.send_prompt();
-    clients.emplace_back(std::move(client));
+    connection.send_prompt();
+    connections.emplace_back(std::move(connection));
   }
 
-  for (auto client = clients.begin(); client != clients.end();) {
-    if (!client->process(request_compiler)) {
-      client = clients.erase(client);
+  for (auto connection = connections.begin(); connection != connections.end();) {
+    if (!connection->process_with(request_compiler)) {
+      connection = connections.erase(connection);
       gd::print("Scheme repl client disconnected.");
     } else {
-      client++;
+      connection++;
     }
   }
 }

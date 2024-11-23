@@ -4,22 +4,36 @@
 using namespace godot;
 using gd = UtilityFunctions;
 
-void ReplClient::disconnect() {
+void ReplConnection::disconnect() {
   tcp_stream->disconnect_from_host();
 }
 
-String ReplClient::get_prompt() {
+String ReplConnection::get_prompt() {
   // auto owner = (target_scheme != nullptr ? (Node *)target_scheme : this)->get_owner();
   // auto path = owner != nullptr ? "" + owner->get_name() + "/" + get_name() : "" + get_name();
   //return "\ns7@(" + path + ")> ";
   return "\ns7@(:)> ";
 }
 
-void ReplClient::send_prompt() {
+void ReplConnection::send(char c) {
+  tcp_stream->put_8(c);
+}
+
+void ReplConnection::send(const char *p, size_t count) {
+  for (int i = 0; i < count; ++i) {
+    send(p[i]);
+  }
+}
+
+void ReplConnection::send(const CharString &s) {
+  send(s.get_data(), s.length());
+}
+
+void ReplConnection::send_prompt() {
   send(get_prompt().utf8());
 }
 
-bool ReplClient::process(ReplRequestCompiler &compiler) {
+bool ReplConnection::process_with(ReplRequestCompiler &compiler) {
   if (tcp_stream->get_status() != StreamPeerTCP::STATUS_CONNECTED) {
     return false;
   }
@@ -34,7 +48,7 @@ bool ReplClient::process(ReplRequestCompiler &compiler) {
 #endif
 
     if (ch == '\n' && available == 0) {
-      if (!process_buffer(compiler)) {
+      if (!process_buffer_with(compiler)) {
         return false;
       }
     } else {
@@ -44,7 +58,7 @@ bool ReplClient::process(ReplRequestCompiler &compiler) {
   return tcp_stream->poll() == Error::OK;
 }
 
-bool ReplClient::process_buffer(ReplRequestCompiler &compiler) {
+bool ReplConnection::process_buffer_with(ReplRequestCompiler &compiler) {
   if (buffer == ",q") {
     // disconnection from repl
     return false;
@@ -56,20 +70,14 @@ bool ReplClient::process_buffer(ReplRequestCompiler &compiler) {
   if (result.first) {
     gd::printerr(result.first);
     send(result.first);
-    tcp_stream->put_8('\n');
+    send('\n');
   }
 #if DEBUG_REPL_INTERACTIONS
   gd::print(result.second);
 #endif
   send(result.second);
-  tcp_stream->put_8('\n');
+  send('\n');
 
   send_prompt();
   return true;
-}
-
-void ReplClient::send(const CharString &s) {
-  for (int i = 0; i < s.length(); ++i) {
-    tcp_stream->put_8(s[i]);
-  }
 }

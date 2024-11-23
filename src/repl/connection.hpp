@@ -1,24 +1,26 @@
 #ifndef GODOT_S7_SCHEME_REPL_REQUEST_CONNECTION_HPP
 #define GODOT_S7_SCHEME_REPL_REQUEST_CONNECTION_HPP
 
-#include <godot_cpp/variant/string.hpp>
-#include <godot_cpp/classes/stream_peer_tcp.hpp>
 #include "request_compiler.hpp"
+#include <godot_cpp/classes/stream_peer_tcp.hpp>
+#include <godot_cpp/variant/string.hpp>
 
-class ReplClient {
+class ReplConnection {
 public:
-  ReplClient(godot::Ref<godot::StreamPeerTCP> tcp_stream) :
+  ReplConnection(godot::Ref<godot::StreamPeerTCP> tcp_stream) :
       tcp_stream(tcp_stream) {}
 
 public:
   void send_prompt();
-  bool process(ReplRequestCompiler &compiler);
+  bool process_with(ReplRequestCompiler &compiler);
   void disconnect();
 
 private:
   godot::String get_prompt();
   void send(const godot::CharString &s);
-  bool process_buffer(ReplRequestCompiler &compiler);
+  void send(const char *p, size_t count);
+  void send(char c);
+  bool process_buffer_with(ReplRequestCompiler &compiler);
 
 private:
   godot::Ref<godot::StreamPeerTCP> tcp_stream;
