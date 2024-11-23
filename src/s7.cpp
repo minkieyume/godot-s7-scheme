@@ -4,7 +4,9 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <vector>
 
-class godot::s7_scheme_context {
+using namespace godot;
+
+class s7_scheme_context {
 public:
   void print_error(uint8_t char_code) {
     if (char_code == '\n') {
@@ -22,8 +24,6 @@ public:
 private:
   std::vector<uint8_t> error_buffer;
 };
-
-using namespace godot;
 
 void add_scheme_mapping(s7_scheme *sc, s7_scheme_context *scheme) {
   s7_define_constant(sc, "*ctx*", s7_make_c_pointer(sc, scheme));

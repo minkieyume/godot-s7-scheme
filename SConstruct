@@ -71,6 +71,7 @@ env.Append(
 
 sources = [
     Glob("src/*.cpp"),
+    Glob("src/repl/*.cpp"),
     Glob("s7/s7.c")
 ]
 
@@ -97,7 +98,7 @@ library = env.SharedLibrary(
 copy = env.InstallAs("{}/bin/{}/{}lib{}".format(project_dir, env["platform"], file_path, file), library)
 
 embed_scheme_repl = env.Command(
-    target="src/repl/generated/s7_scheme_repl_string.hpp",
+    target="src/repl/gen/s7_scheme_repl_string.hpp",
     source="demo/addons/s7/s7_scheme_repl.scm",
     action=embed_file
 )

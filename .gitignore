@@ -30,6 +30,9 @@ compile_commands.json
 # Ignore files generated for documentation
 /src/gen
 
+# Ignore files generated for the repl
+/src/repl/gen
+
 # Binaries
 *.o
 *.os

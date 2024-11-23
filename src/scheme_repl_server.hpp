@@ -1,10 +1,7 @@
 #ifndef GODOT_S7_SCHEME_SCHEME_REPL_SERVER_H
 #define GODOT_S7_SCHEME_SCHEME_REPL_SERVER_H
 
-#include "s7.hpp"
 #include <godot_cpp/classes/object.hpp>
-#include <godot_cpp/classes/stream_peer_tcp.hpp>
-#include <godot_cpp/classes/tcp_server.hpp>
 #include <godot_cpp/classes/thread.hpp>
 
 namespace godot {

@@ -7,7 +7,6 @@
 
 typedef void (*s7_output_port_function_t)(s7_scheme *sc, uint8_t c, s7_pointer port);
 
-namespace godot {
 typedef std::shared_ptr<s7_cell> s7_protected_ptr;
 
 inline s7_protected_ptr s7_gc_protected(s7_scheme *sc, s7_pointer p) {
@@ -30,8 +29,8 @@ public:
 			const char *name,
 			s7_pointer value,
 			const char *documentation) const;
-	[[nodiscard]] s7_pointer eval(const String &code) const;
-	void load_string(const String &code) const;
+	[[nodiscard]] s7_pointer eval(const godot::String &code) const;
+	void load_string(const godot::String &code) const;
 	void set_current_error_port_function(s7_output_port_function_t f) const;
 
 	s7_protected_ptr make_symbol(const char *name) const {
@@ -84,5 +83,4 @@ private:
 	std::shared_ptr<s7_scheme> scheme;
 	std::shared_ptr<s7_scheme_context> scheme_context;
 };
-} //namespace godot
 #endif //GODOT_S7_SCHEME_S7_HPP
