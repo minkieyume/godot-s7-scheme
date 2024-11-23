@@ -4,13 +4,31 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
-using gd = godot::UtilityFunctions;
+using gd = UtilityFunctions;
+
+std::optional<std::pair<uint16_t, String>> parse_repl_args() {
+  // TODO: accept --s7-tcp-address=<address>
+  String tcp_bind_address = "127.0.0.1";
+
+  auto args = OS::get_singleton()->get_cmdline_args();
+  for (auto arg = args.begin(); arg != args.end(); ++arg) {
+    if (arg->begins_with("--s7-tcp-port")) {
+      auto parts = arg->split("=");
+      auto tcp_port = parts.size() > 1 ? parts[1].to_int() : 0;
+      return std::make_pair(tcp_port, tcp_bind_address);
+    }
+  }
+  return std::nullopt;
+}
 
 void SchemeReplServer::server_loop() {
-  // TODO: only start server when --s7-tcp-port=<number> and/or --s7-tcp-address=<address> are present in OS::get_cmdline_args()
+  auto repl_args = parse_repl_args();
+  if (!repl_args) {
+    return;
+  }
 
-  String tcp_bind_address = "127.0.0.1";
-  int tcp_port = 0;
+  int tcp_port = repl_args->first;
+  const String &tcp_bind_address = repl_args->second;
 
   Ref<TCPServer> tcp_server;
   tcp_server.instantiate();
