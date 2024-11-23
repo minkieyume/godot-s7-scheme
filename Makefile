@@ -20,8 +20,8 @@ build:
 
 .PHONY: run
 
-run:
-	scons && godot -e --path demo main.tscn
+run: demo/.godot
+	godot -e --path demo main.tscn
 
 .PHONY: android
 
