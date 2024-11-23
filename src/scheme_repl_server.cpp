@@ -1,5 +1,5 @@
 #include "scheme_repl_server.hpp"
-#include "repl/s7_scheme_repl_string.hpp"
+#include "repl/generated/s7_scheme_repl_string.hpp"
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/stream_peer_tcp.hpp>
@@ -11,8 +11,6 @@
 
 using namespace godot;
 using gd = godot::UtilityFunctions;
-
-typedef std::basic_string<char> str;
 
 typedef std::pair<const char *, const char *> error_output_and_response;
 
@@ -36,7 +34,7 @@ public:
   ~ReplRequestCompiler();
 
 public:
-  error_output_and_response eval(const str &request);
+  error_output_and_response eval(const std::string &request);
 
 private:
   s7_protected_ptr compile_geiser_request;
@@ -47,9 +45,12 @@ ReplRequestCompiler::ReplRequestCompiler() {
   compile_geiser_request = scheme.make_symbol("compile-geiser-request");
   auto result = eval_with_error_output<const char *>(scheme.get(), [](auto sc) {
 #if DEBUG_REPL_INTERACTIONS
-  std::cout << s7_scheme_repl_string << std::endl;
+    std::cout << s7_scheme_repl_string << std::endl;
 #endif
-    return s7_object_to_c_string(sc, s7_load_c_string(sc, s7_scheme_repl_string, strlen(s7_scheme_repl_string)));
+    return s7_object_to_c_string(sc,
+        s7_load_c_string(sc,
+            s7_scheme_repl_string,
+            strlen(s7_scheme_repl_string)));
   });
   auto error_output = non_empty_nor_null(result.first);
   if (error_output) {
@@ -61,7 +62,7 @@ ReplRequestCompiler::~ReplRequestCompiler() {
   compile_geiser_request = nullptr;
 }
 
-error_output_and_response ReplRequestCompiler::eval(const str &request) {
+error_output_and_response ReplRequestCompiler::eval(const std::string &request) {
   auto compile_geiser_request = scheme.value_of(this->compile_geiser_request);
   if (!s7_is_procedure(compile_geiser_request)) {
     return std::make_pair(
@@ -119,14 +120,18 @@ public:
       tcp_stream(tcp_stream) {}
 
 public:
-  void send(const CharString &s);
-  String get_prompt();
+  void send_prompt();
   bool process(ReplRequestCompiler &compiler);
   void disconnect();
 
 private:
+  String get_prompt();
+  void send(const CharString &s);
+  bool process_buffer(ReplRequestCompiler &compiler);
+
+private:
   Ref<StreamPeerTCP> tcp_stream;
-  str buffer;
+  std::string buffer;
 };
 
 void ReplClient::disconnect() {
@@ -138,6 +143,10 @@ String ReplClient::get_prompt() {
   // auto path = owner != nullptr ? "" + owner->get_name() + "/" + get_name() : "" + get_name();
   //return "\ns7@(" + path + ")> ";
   return "\ns7@(:)> ";
+}
+
+void ReplClient::send_prompt() {
+  send(get_prompt().utf8());
 }
 
 bool ReplClient::process(ReplRequestCompiler &compiler) {
@@ -155,30 +164,38 @@ bool ReplClient::process(ReplRequestCompiler &compiler) {
 #endif
 
     if (ch == '\n' && available == 0) {
-      auto prompt = get_prompt().utf8();
-      if (buffer == ",q") {
-        // disconnection from repl
+      if (!process_buffer(compiler)) {
         return false;
       }
-
-      auto result = compiler.eval(buffer);
-      buffer.clear();
-
-      if (result.first) {
-        gd::printerr(result.first);
-        send(result.first);
-        tcp_stream->put_8('\n');
-      }
-      gd::print(result.second);
-      send(result.second);
-      tcp_stream->put_8('\n');
-
-      send(prompt);
     } else {
       buffer.push_back(ch);
     }
   }
   return tcp_stream->poll() == Error::OK;
+}
+
+bool ReplClient::process_buffer(ReplRequestCompiler &compiler) {
+  if (buffer == ",q") {
+    // disconnection from repl
+    return false;
+  }
+
+  auto result = compiler.eval(buffer);
+  buffer.clear();
+
+  if (result.first) {
+    gd::printerr(result.first);
+    send(result.first);
+    tcp_stream->put_8('\n');
+  }
+#if DEBUG_REPL_INTERACTIONS
+  gd::print(result.second);
+#endif
+  send(result.second);
+  tcp_stream->put_8('\n');
+
+  send_prompt();
+  return true;
 }
 
 void ReplClient::send(const CharString &s) {
@@ -187,53 +204,37 @@ void ReplClient::send(const CharString &s) {
   }
 }
 
-class ReplController {
+class ReplMediator {
 public:
-  ReplController(Ref<TCPServer> server) :
+  ReplMediator(Ref<TCPServer> server) :
       server(server) {}
 
 public:
-  void process();
+  void mediate();
 
 private:
   Ref<TCPServer> server;
-  ReplRequestCompiler request_compiler;
   std::vector<ReplClient> clients;
+  ReplRequestCompiler request_compiler;
 };
 
-void ReplController::process() {
+void ReplMediator::mediate() {
   if (server->is_connection_available()) {
     // TODO: client starts with most recent Scheme node
     auto client = ReplClient(server->take_connection());
     gd::print("Scheme repl client connected.");
-    client.send(client.get_prompt().utf8());
+    client.send_prompt();
     clients.emplace_back(std::move(client));
   }
 
-  if (clients.empty()) {
-    return;
+  for (auto client = clients.begin(); client != clients.end();) {
+    if (!client->process(request_compiler)) {
+      client = clients.erase(client);
+      gd::print("Scheme repl client disconnected.");
+    } else {
+      client++;
+    }
   }
-
-  auto client_index = 0;
-  auto disconnected = std::vector<int>();
-  std::for_each(
-      clients.begin(),
-      clients.end(),
-      [&](auto &client) {
-        if (!client.process(request_compiler)) {
-          disconnected.push_back(client_index);
-        }
-        client_index++;
-      });
-  std::for_each(
-      disconnected.rbegin(),
-      disconnected.rend(),
-      [&](auto i) {
-        auto c = clients.begin() + i;
-        c->disconnect();
-        clients.erase(c);
-        gd::print("Scheme repl client disconnected.");
-      });
 }
 
 void SchemeReplServer::server_loop() {
@@ -252,10 +253,10 @@ void SchemeReplServer::server_loop() {
 
   gd::print("Scheme repl server listening on local port ", tcp_server->get_local_port());
 
-  auto controller = ReplController(tcp_server);
+  auto mediator = ReplMediator(tcp_server);
   while (!exit_thread) {
-    controller.process();
-    OS::get_singleton()->delay_msec(250);
+    mediator.mediate();
+    OS::get_singleton()->delay_msec(50);
   }
   tcp_server->stop();
 }

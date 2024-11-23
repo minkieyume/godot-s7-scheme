@@ -3,6 +3,7 @@ import os
 import sys
 from methods import print_error
 
+# -------------------------- Utility Functions --------------------------
 def embed_file(target, source, env):
     """
     Embeds the content of <source> file into a <target> header file as a const char* constant.
@@ -30,36 +31,32 @@ const char* {constant_name} = R"({file_content})";
 #endif // {header_guard}
 """)
 
+def is_submodule_initialized(path):
+  return os.path.isdir(path) and os.listdir(path)
 
-libname = "godot-s7-scheme"
-projectdir = "demo"
+# -------------------------- Build definition --------------------------
 
-localEnv = Environment(tools=["default"], PLATFORM="")
+lib_name = "godot-s7-scheme"
+project_dir = "demo"
+
+local_env = Environment(tools=["default"], PLATFORM="")
 
 customs = ["custom.py"]
 customs = [os.path.abspath(path) for path in customs]
 
 opts = Variables(customs, ARGUMENTS)
-opts.Update(localEnv)
+opts.Update(local_env)
 
-Help(opts.GenerateHelpText(localEnv))
+Help(opts.GenerateHelpText(local_env))
 
-env = localEnv.Clone()
-
-submodule_initialized = False
-dir_name = 'godot-cpp'
-if os.path.isdir(dir_name):
-    if os.listdir(dir_name):
-        submodule_initialized = True
-
-if not submodule_initialized:
+if not is_submodule_initialized('godot-cpp'):
     print_error("""godot-cpp is not available within this folder, as Git submodules haven't been initialized.
 Run the following command to download godot-cpp:
 
     git submodule update --init --recursive""")
     sys.exit(1)
 
-env = SConscript("godot-cpp/SConstruct", {"env": env, "customs": customs})
+env = SConscript("godot-cpp/SConstruct", {"env": local_env.Clone(), "customs": customs})
 env.Append(
     CPPPATH=["src/", "s7/"],
     CPPDEFINES={
@@ -84,23 +81,23 @@ if env["target"] in ["editor", "template_debug"]:
     except AttributeError:
         print("Not including class reference as we're targeting a pre-4.3 baseline.")
 
-file = "{}{}{}".format(libname, env["suffix"], env["SHLIBSUFFIX"])
-filepath = ""
+file = "{}{}{}".format(lib_name, env["suffix"], env["SHLIBSUFFIX"])
+file_path = ""
 
 if env["platform"] == "macos" or env["platform"] == "ios":
-    filepath = "{}.framework/".format(env["platform"])
-    file = "{}.{}.{}".format(libname, env["platform"], env["target"])
+    file_path = "{}.framework/".format(env["platform"])
+    file = "{}.{}.{}".format(lib_name, env["platform"], env["target"])
 
-libraryfile = "bin/{}/{}{}".format(env["platform"], filepath, file)
+library_file = "bin/{}/{}{}".format(env["platform"], file_path, file)
 library = env.SharedLibrary(
-    libraryfile,
+    library_file,
     source=sources,
 )
 
-copy = env.InstallAs("{}/bin/{}/{}lib{}".format(projectdir, env["platform"], filepath, file), library)
+copy = env.InstallAs("{}/bin/{}/{}lib{}".format(project_dir, env["platform"], file_path, file), library)
 
 embed_scheme_repl = env.Command(
-    target="src/repl/s7_scheme_repl_string.hpp",
+    target="src/repl/generated/s7_scheme_repl_string.hpp",
     source="demo/addons/s7/s7_scheme_repl.scm",
     action=embed_file
 )
