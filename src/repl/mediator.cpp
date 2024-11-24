@@ -1,13 +1,36 @@
 #include "mediator.hpp"
+#include "debug.hpp"
 #include <godot_cpp/variant/utility_functions.hpp>
 
-using gd = godot::UtilityFunctions;
+ReplMediator::ReplMediator(godot::Ref<godot::TCPServer> server) :
+    server(server) {
+  node_registry = std::make_shared<ReplNodeRegistry>();
+}
 
-bool ReplMediator::mediate() {
+struct ReplMessageHandler {
+  ReplMediator* mediator;
+
+  void operator()(const ReplMessage::PublishNode &m) {
+    mediator->node_registry->register_node(m.node_id, std::move(m.node_name));
+  }
+  void operator()(const ReplMessage::UnpublishNode &m) {
+    mediator->node_registry->unregister_node(m.node_id);
+  }
+  void operator()(const ReplMessage::EvalResponse &m) {
+  }
+};
+
+bool ReplMediator::mediate(MessageQueue &queue) {
   int interactions = 0;
+  auto message = std::move(queue.pop());
+  if (message) {
+    std::visit(ReplMessageHandler{this}, message->payload);
+    interactions++;
+  }
+
   if (server->is_connection_available()) {
     // TODO: client starts with most recent Scheme node
-    auto connection = ReplConnection(server->take_connection());
+    auto connection = ReplConnection(server->take_connection(), node_registry);
     gd::print("Scheme repl client connected.");
     connection.send_prompt();
     connections.emplace_back(std::move(connection));

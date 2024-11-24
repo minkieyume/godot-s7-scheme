@@ -1,10 +1,10 @@
 #include "request_compiler.hpp"
+#include "debug.hpp"
 #include "gen/s7_scheme_repl_string.hpp"
 #include <functional>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
-using gd = UtilityFunctions;
 
 template <typename T>
 std::pair<const char *, T> eval_with_error_output(s7_scheme *sc, std::function<T(s7_scheme *)> f) {
@@ -23,9 +23,7 @@ inline const char *non_empty_nor_null(const char *s) {
 ReplRequestCompiler::ReplRequestCompiler() {
   compile_geiser_request = scheme.make_symbol("compile-geiser-request");
   auto result = eval_with_error_output<const char *>(scheme.get(), [](auto sc) {
-#if DEBUG_REPL_INTERACTIONS
-    std::cout << s7_scheme_repl_string << std::endl;
-#endif
+    DEBUG_REPL(s7_scheme_repl_string);
     return s7_object_to_c_string(sc,
         s7_load_c_string(sc,
             s7_scheme_repl_string,
@@ -56,7 +54,7 @@ error_output_and_response ReplRequestCompiler::eval(const PackedByteArray &reque
             auto args = s7_cons(sc,
                 s7_make_string_wrapper_with_length(
                     sc,
-                    reinterpret_cast<const char*>(request.ptr()),
+                    reinterpret_cast<const char *>(request.ptr()),
                     static_cast<s7_int>(request.size())),
                 s7_nil(sc));
             return s7_call_with_location(
@@ -77,12 +75,7 @@ error_output_and_response ReplRequestCompiler::eval(const PackedByteArray &reque
   }
 
   auto code_string = s7_string(compiled_request);
-
-#if DEBUG_REPL_INTERACTIONS
-  std::cout << "```" << std::endl
-            << code_string << std::endl
-            << "```" << std::endl;
-#endif
+  DEBUG_REPL("```\n", code_string, "\n```");
 
   auto eval_sc = /*target_scheme != nullptr ? target_scheme->get_s7().get() :*/ sc;
   auto res = eval_with_error_output<const char *>(eval_sc,

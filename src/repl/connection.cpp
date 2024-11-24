@@ -1,8 +1,7 @@
 #include "connection.hpp"
-#include <godot_cpp/variant/utility_functions.hpp>
+#include "debug.hpp"
 
 using namespace godot;
-using gd = UtilityFunctions;
 
 void ReplConnection::disconnect() {
   tcp_stream->disconnect_from_host();
@@ -69,7 +68,26 @@ bool ReplConnection::process_buffer_with(ReplRequestCompiler &compiler) {
     // disconnection from repl
     return false;
   }
+  if (buffer.size() == 3 && buffer.get_string_from_utf8() == ",ls") {
+    buffer.clear();
+    send_available_nodes();
+    return true;
+  }
 
+  process_eval_request_with(compiler);
+  return true;
+}
+
+void ReplConnection::send_available_nodes() {
+  auto node_paths = node_registry->get_available_node_names();
+  for (auto path = node_paths.begin(); path != node_paths.end(); ++path) {
+    send(path->utf8());
+    send('\n');
+  }
+  send_prompt();
+}
+
+void ReplConnection::process_eval_request_with(ReplRequestCompiler &compiler) {
   auto result = compiler.eval(buffer);
   buffer.clear();
 
@@ -78,12 +96,10 @@ bool ReplConnection::process_buffer_with(ReplRequestCompiler &compiler) {
     send(result.first);
     send('\n');
   }
-#if DEBUG_REPL_INTERACTIONS
-  gd::print(result.second);
-#endif
+
+  DEBUG_REPL(result.second);
   send(result.second);
   send('\n');
 
   send_prompt();
-  return true;
 }

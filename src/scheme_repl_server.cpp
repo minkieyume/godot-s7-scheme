@@ -6,6 +6,41 @@
 using namespace godot;
 using gd = UtilityFunctions;
 
+void SchemeReplServer::publish_node(const Scheme *node) {
+  if (thread.is_null()) {
+    return;
+  }
+  auto node_name = node->get_path().slice(-2).get_concatenated_names();
+  message_queue.push(std::move(ReplMessage::publish_node(std::move(node_name), node->get_instance_id())));
+}
+
+void SchemeReplServer::unpublish_node(const Scheme *node) {
+  if (thread.is_null()) {
+    return;
+  }
+  message_queue.push(std::move(ReplMessage::unpublish_node(node->get_instance_id())));
+}
+
+void SchemeReplServer::server_loop(int tcp_port, const String &tcp_bind_address) {
+  Ref<TCPServer> tcp_server;
+  tcp_server.instantiate();
+
+  auto error = tcp_server->listen(tcp_port, tcp_bind_address);
+  ERR_FAIL_COND_MSG(
+      error != OK,
+      ("Failed to start scheme repl server: " + gd::error_string(error)));
+
+  gd::print("Scheme repl server listening on local port ", tcp_server->get_local_port());
+
+  auto mediator = ReplMediator(tcp_server);
+  while (!exit_thread) {
+    if (!mediator.mediate(message_queue)) {
+      OS::get_singleton()->delay_msec(50);
+    }
+  }
+  tcp_server->stop();
+}
+
 std::optional<std::pair<uint16_t, String>> parse_repl_args() {
   // TODO: accept --s7-tcp-address=<address>
   String tcp_bind_address = "127.0.0.1";
@@ -21,39 +56,22 @@ std::optional<std::pair<uint16_t, String>> parse_repl_args() {
   return std::nullopt;
 }
 
-void SchemeReplServer::server_loop() {
+Error SchemeReplServer::init() {
+  ERR_FAIL_COND_V_MSG(thread.is_valid(), ERR_BUG, "Scheme repl server can only be started once!");
+
   auto repl_args = parse_repl_args();
   if (!repl_args) {
-    return;
+    return Error::OK;
   }
 
   int tcp_port = repl_args->first;
   const String &tcp_bind_address = repl_args->second;
 
-  Ref<TCPServer> tcp_server;
-  tcp_server.instantiate();
-
-  auto error = tcp_server->listen(tcp_port, tcp_bind_address);
-  ERR_FAIL_COND_MSG(
-      error != OK,
-      ("Failed to start scheme repl server: " + gd::error_string(error)));
-
-  gd::print("Scheme repl server listening on local port ", tcp_server->get_local_port());
-
-  auto mediator = ReplMediator(tcp_server);
-  while (!exit_thread) {
-    if (!mediator.mediate()) {
-      OS::get_singleton()->delay_msec(50);
-    }
-  }
-  tcp_server->stop();
-}
-
-Error SchemeReplServer::init() {
-  ERR_FAIL_COND_V_MSG(thread.is_valid(), ERR_BUG, "Scheme repl server can only be started once!");
   exit_thread = false;
   thread.instantiate();
-  return thread->start(Callable::create(this, "server_loop"), Thread::PRIORITY_LOW);
+  return thread->start(
+      Callable::create(this, "server_loop").bind(tcp_port, tcp_bind_address),
+      Thread::PRIORITY_LOW);
 }
 
 void SchemeReplServer::finish() {

@@ -4,8 +4,6 @@
 #include "../s7.hpp"
 #include <godot_cpp/variant/packed_byte_array.hpp>
 
-#define DEBUG_REPL_INTERACTIONS 0
-
 typedef std::pair<const char *, const char *> error_output_and_response;
 
 class ReplRequestCompiler {
