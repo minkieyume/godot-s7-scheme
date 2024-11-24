@@ -8,15 +8,14 @@ bin/s7: s7/s7.c
 	@echo ⚙️ Building scheme interpreter
 	gcc s7/s7.c -o bin/s7 -DWITH_MAIN -DWITH_SYSTEM_EXTRAS -DWITH_C_LOADER=0 -I. -O2 -g -ldl -lm
 
-demo/.godot: $(wildcard demo/addons/**) $(wildcard demo/bin/**) build
-	@echo 📦 Importing test scene
-	godot --path demo --headless --import
+SRC_FILES := $(shell find src -type f ! -name "*.os")
+DEMO_FILES := $(shell find demo -type f -name "*.tscn" -or -name "*.scm")
 
-.PHONY: build
-
-build:
+demo/.godot: $(SRC_FILES) $(DEMO_FILES)
 	@echo ⚙️ Building extension
 	@scons
+	@echo 📦 Importing test scene
+	godot --path demo --headless --import
 
 .PHONY: run
 
