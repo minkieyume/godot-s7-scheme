@@ -12,7 +12,11 @@ public:
       server(server) {}
 
 public:
-  void mediate();
+  /**
+   * Process all pending interactions.
+   * @return true when at least one interaction was processed, false otherwise.
+   */
+  bool mediate();
 
 private:
   godot::Ref<godot::TCPServer> server;

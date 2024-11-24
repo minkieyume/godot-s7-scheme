@@ -42,8 +42,9 @@ void SchemeReplServer::server_loop() {
 
   auto mediator = ReplMediator(tcp_server);
   while (!exit_thread) {
-    mediator.mediate();
-    OS::get_singleton()->delay_msec(50);
+    if (!mediator.mediate()) {
+      OS::get_singleton()->delay_msec(50);
+    }
   }
   tcp_server->stop();
 }

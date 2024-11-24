@@ -33,12 +33,13 @@ void ReplConnection::send_prompt() {
   send(get_prompt().utf8());
 }
 
-bool ReplConnection::process_with(ReplRequestCompiler &compiler) {
+ReplConnection::Status ReplConnection::process_with(ReplRequestCompiler &compiler) {
   if (tcp_stream->get_status() != StreamPeerTCP::STATUS_CONNECTED) {
-    return false;
+    return ReplConnection::DISCONNECTED;
   }
 
   auto available = tcp_stream->get_available_bytes();
+  auto originally_available = available;
   while (available > 0) {
     available--;
     auto ch = tcp_stream->get_8();
@@ -49,17 +50,22 @@ bool ReplConnection::process_with(ReplRequestCompiler &compiler) {
 
     if (ch == '\n' && available == 0) {
       if (!process_buffer_with(compiler)) {
-        return false;
+        return ReplConnection::DISCONNECTED;
       }
     } else {
       buffer.push_back(ch);
     }
   }
-  return tcp_stream->poll() == Error::OK;
+  if (tcp_stream->poll() != Error::OK) {
+    return ReplConnection::DISCONNECTED;
+  }
+  return originally_available > 0
+      ? ReplConnection::TRANSMITTING
+      : ReplConnection::IDLE;
 }
 
 bool ReplConnection::process_buffer_with(ReplRequestCompiler &compiler) {
-  if (buffer == ",q") {
+  if (buffer.size() == 2 && buffer.get_string_from_utf8() == ",q") {
     // disconnection from repl
     return false;
   }

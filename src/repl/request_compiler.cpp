@@ -3,7 +3,8 @@
 #include <functional>
 #include <godot_cpp/variant/utility_functions.hpp>
 
-using gd = godot::UtilityFunctions;
+using namespace godot;
+using gd = UtilityFunctions;
 
 template <typename T>
 std::pair<const char *, T> eval_with_error_output(s7_scheme *sc, std::function<T(s7_scheme *)> f) {
@@ -40,7 +41,7 @@ ReplRequestCompiler::~ReplRequestCompiler() {
   compile_geiser_request = nullptr;
 }
 
-error_output_and_response ReplRequestCompiler::eval(const std::string &request) {
+error_output_and_response ReplRequestCompiler::eval(const PackedByteArray &request) {
   auto compile_geiser_request = scheme.value_of(this->compile_geiser_request);
   if (!s7_is_procedure(compile_geiser_request)) {
     return std::make_pair(
@@ -55,8 +56,8 @@ error_output_and_response ReplRequestCompiler::eval(const std::string &request) 
             auto args = s7_cons(sc,
                 s7_make_string_wrapper_with_length(
                     sc,
-                    request.c_str(),
-                    static_cast<s7_int>(request.length())),
+                    reinterpret_cast<const char*>(request.ptr()),
+                    static_cast<s7_int>(request.size())),
                 s7_nil(sc));
             return s7_call_with_location(
                 sc,

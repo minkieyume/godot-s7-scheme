@@ -4,15 +4,17 @@
 #include "request_compiler.hpp"
 #include <godot_cpp/classes/stream_peer_tcp.hpp>
 #include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/packed_byte_array.hpp>
 
 class ReplConnection {
 public:
+  enum Status { IDLE, TRANSMITTING, DISCONNECTED };
   ReplConnection(godot::Ref<godot::StreamPeerTCP> tcp_stream) :
       tcp_stream(tcp_stream) {}
 
 public:
   void send_prompt();
-  bool process_with(ReplRequestCompiler &compiler);
+  Status process_with(ReplRequestCompiler &compiler);
   void disconnect();
 
 private:
@@ -24,6 +26,6 @@ private:
 
 private:
   godot::Ref<godot::StreamPeerTCP> tcp_stream;
-  std::string buffer;
+  godot::PackedByteArray buffer;
 };
 #endif

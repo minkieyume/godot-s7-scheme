@@ -2,7 +2,7 @@
 #define GODOT_S7_SCHEME_REPL_REQUEST_COMPILER_HPP
 
 #include "../s7.hpp"
-#include <string>
+#include <godot_cpp/variant/packed_byte_array.hpp>
 
 #define DEBUG_REPL_INTERACTIONS 0
 
@@ -14,7 +14,7 @@ public:
   ~ReplRequestCompiler();
 
 public:
-  error_output_and_response eval(const std::string &request);
+  error_output_and_response eval(const godot::PackedByteArray &request);
 
 private:
   s7_protected_ptr compile_geiser_request;
