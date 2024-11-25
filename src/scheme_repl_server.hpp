@@ -15,6 +15,7 @@ public: // public API
   static SchemeReplServer *get_singleton();
   void publish_node(const Scheme *node);
   void unpublish_node(const Scheme *node);
+  void reply(Variant result, uint64_t request_id);
 
 private:
   static SchemeReplServer *singleton;

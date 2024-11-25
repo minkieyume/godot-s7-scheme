@@ -12,7 +12,8 @@ public:
   ~ReplRequestCompiler();
 
 public:
-  error_output_and_response eval(const godot::PackedByteArray &request);
+  error_output_and_response compile_request(const godot::PackedByteArray &request);
+  error_output_and_response eval(const char* compiled_request);
 
 private:
   s7_protected_ptr compile_geiser_request;

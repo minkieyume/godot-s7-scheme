@@ -13,7 +13,7 @@ class ReplMediator {
 public:
   using MessageQueue = ThreadSafeQueue<ReplMessage>;
 
-  ReplMediator(godot::Ref<godot::TCPServer> server);
+  ReplMediator(godot::Ref<godot::TCPServer> server, godot::Callable reply);
 
 public:
   /**
@@ -27,6 +27,7 @@ private:
 
 private:
   godot::Ref<godot::TCPServer> server;
+  godot::Callable reply;
   std::shared_ptr<ReplNodeRegistry> node_registry;
   std::vector<ReplConnection> connections;
   ReplRequestCompiler request_compiler;

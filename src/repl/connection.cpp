@@ -11,6 +11,9 @@ String ReplConnection::get_prompt() {
   // auto owner = (target_scheme != nullptr ? (Node *)target_scheme : this)->get_owner();
   // auto path = owner != nullptr ? "" + owner->get_name() + "/" + get_name() : "" + get_name();
   //return "\ns7@(" + path + ")> ";
+  if (target_node) {
+    return "\ns7@(" + target_node->node_name + ")> ";
+  }
   return "\ns7@(:)> ";
 }
 
@@ -32,7 +35,7 @@ void ReplConnection::send_prompt() {
   send(get_prompt().utf8());
 }
 
-ReplConnection::Status ReplConnection::process_with(ReplRequestCompiler &compiler) {
+ReplConnection::Status ReplConnection::process_with(ReplRequestCompiler &compiler, const Callable& reply) {
   if (tcp_stream->get_status() != StreamPeerTCP::STATUS_CONNECTED) {
     return ReplConnection::DISCONNECTED;
   }
@@ -48,7 +51,7 @@ ReplConnection::Status ReplConnection::process_with(ReplRequestCompiler &compile
 #endif
 
     if (ch == '\n' && available == 0) {
-      if (!process_buffer_with(compiler)) {
+      if (!process_buffer_with(compiler, reply)) {
         return ReplConnection::DISCONNECTED;
       }
     } else {
@@ -63,7 +66,7 @@ ReplConnection::Status ReplConnection::process_with(ReplRequestCompiler &compile
       : ReplConnection::IDLE;
 }
 
-bool ReplConnection::process_buffer_with(ReplRequestCompiler &compiler) {
+bool ReplConnection::process_buffer_with(ReplRequestCompiler &compiler, const Callable& reply) {
   if (buffer.size() == 2 && buffer.get_string_from_utf8() == ",q") {
     // disconnection from repl
     return false;
@@ -74,7 +77,7 @@ bool ReplConnection::process_buffer_with(ReplRequestCompiler &compiler) {
     return true;
   }
 
-  process_eval_request_with(compiler);
+  process_eval_request_with(compiler, reply);
   return true;
 }
 
@@ -87,19 +90,32 @@ void ReplConnection::send_available_nodes() {
   send_prompt();
 }
 
-void ReplConnection::process_eval_request_with(ReplRequestCompiler &compiler) {
-  auto result = compiler.eval(buffer);
+void ReplConnection::process_eval_request_with(ReplRequestCompiler &compiler, const Callable& reply) {
+  auto compiled_request = compiler.compile_request(buffer);
   buffer.clear();
 
-  if (result.first) {
-    gd::printerr(result.first);
-    send(result.first);
+  if (compiled_request.first) {
+    gd::printerr(compiled_request.first);
+    send(compiled_request.first);
     send('\n');
   }
 
-  DEBUG_REPL(result.second);
-  send(result.second);
-  send('\n');
+  if (compiled_request.second) {
+    if (target_node) {
+      auto scheme_node = ObjectDB::get_instance(target_node->node_id);
+      if (scheme_node) {
+        scheme_node->call_deferred("eval_async", compiled_request.second, reply.bind(42));
+      } else {
+        send("Target scheme node has been disconnected");
+        target_node = std::nullopt;
+      }
+    } else {
+      auto result = compiler.eval(compiled_request.second);
+      DEBUG_REPL(result.second);
+      send(result.second);
+    }
+    send('\n');
+  }
 
   send_prompt();
 }

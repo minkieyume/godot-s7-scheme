@@ -21,6 +21,13 @@ void SchemeReplServer::unpublish_node(const Scheme *node) {
   message_queue.push(std::move(ReplMessage::unpublish_node(node->get_instance_id())));
 }
 
+void SchemeReplServer::reply(Variant result, uint64_t request_id) {
+  if (thread.is_null()) {
+    return;
+  }
+  message_queue.push(std::move(ReplMessage::eval_response(request_id, std::move(result))));
+}
+
 void SchemeReplServer::server_loop(int tcp_port, const String &tcp_bind_address) {
   Ref<TCPServer> tcp_server;
   tcp_server.instantiate();
@@ -32,7 +39,7 @@ void SchemeReplServer::server_loop(int tcp_port, const String &tcp_bind_address)
 
   gd::print("Scheme repl server listening on local port ", tcp_server->get_local_port());
 
-  auto mediator = ReplMediator(tcp_server);
+  auto mediator = ReplMediator(tcp_server, Callable::create(this, "reply"));
   while (!exit_thread) {
     if (!mediator.mediate(message_queue)) {
       OS::get_singleton()->delay_msec(50);
@@ -97,4 +104,5 @@ SchemeReplServer::SchemeReplServer() {
 
 void SchemeReplServer::_bind_methods() {
   ClassDB::bind_method(D_METHOD("server_loop"), &SchemeReplServer::server_loop);
+  ClassDB::bind_method(D_METHOD("reply"), &SchemeReplServer::reply);
 }

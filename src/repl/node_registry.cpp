@@ -4,6 +4,13 @@
 
 using namespace godot;
 
+std::optional<ReplNodeRegistry::NodeRecord> ReplNodeRegistry::get_most_recent() {
+  if (nodes.empty()) {
+    return std::nullopt;
+  }
+  return nodes.back();
+}
+
 std::vector<String> ReplNodeRegistry::get_available_node_names() {
   auto result = std::vector<String>();
   for (auto node = nodes.begin(); node != nodes.end(); ++node) {

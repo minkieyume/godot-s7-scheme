@@ -1,13 +1,12 @@
 #include "request_compiler.hpp"
 #include "debug.hpp"
 #include "gen/s7_scheme_repl_string.hpp"
-#include <functional>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
 
-template <typename T>
-std::pair<const char *, T> eval_with_error_output(s7_scheme *sc, std::function<T(s7_scheme *)> f) {
+template <typename T, typename Function>
+std::pair<const char *, T> eval_with_error_output(s7_scheme *sc, Function f) {
   auto error_port = s7_open_output_string(sc);
   auto previous_error_port = s7_set_current_error_port(sc, error_port);
   auto res = f(sc);
@@ -39,12 +38,19 @@ ReplRequestCompiler::~ReplRequestCompiler() {
   compile_geiser_request = nullptr;
 }
 
-error_output_and_response ReplRequestCompiler::eval(const PackedByteArray &request) {
+error_output_and_response ReplRequestCompiler::eval(const char *compiled_request) {
+  auto res = eval_with_error_output<const char *>(scheme.get(),
+      [compiled_request](auto sc) {
+        auto res = s7_eval_c_string(sc, compiled_request);
+        return s7_is_string(res) ? s7_string(res) : s7_object_to_c_string(sc, res);
+      });
+  return std::make_pair(non_empty_nor_null(res.first), res.second);
+}
+
+error_output_and_response ReplRequestCompiler::compile_request(const PackedByteArray &request) {
   auto compile_geiser_request = scheme.value_of(this->compile_geiser_request);
   if (!s7_is_procedure(compile_geiser_request)) {
-    return std::make_pair(
-        "repl script is missing a compile-geiser-request function!",
-        "'done");
+    return std::make_pair("repl script is missing a compile-geiser-request function!", (const char *)nullptr);
   }
 
   auto sc = scheme.get();
@@ -66,22 +72,14 @@ error_output_and_response ReplRequestCompiler::eval(const PackedByteArray &reque
                 __LINE__);
           });
 
-  auto compile_error_output = compile_result.first;
+  auto compile_error_output = non_empty_nor_null(compile_result.first);
   auto compiled_request = compile_result.second;
   if (!s7_is_string(compiled_request)) {
-    return std::make_pair(
-        non_empty_nor_null(compile_error_output),
-        s7_object_to_c_string(sc, compiled_request));
+    DEBUG_REPL(s7_object_to_c_string(sc, compiled_request));
+    return std::make_pair(compile_error_output, (const char *)nullptr);
   }
 
   auto code_string = s7_string(compiled_request);
   DEBUG_REPL("```\n", code_string, "\n```");
-
-  auto eval_sc = /*target_scheme != nullptr ? target_scheme->get_s7().get() :*/ sc;
-  auto res = eval_with_error_output<const char *>(eval_sc,
-      [code_string](auto sc) {
-        auto res = s7_eval_c_string(sc, code_string);
-        return s7_is_string(res) ? s7_string(res) : s7_object_to_c_string(sc, res);
-      });
-  return std::make_pair(non_empty_nor_null(res.first), res.second);
+  return std::make_pair(compile_error_output, code_string);
 }

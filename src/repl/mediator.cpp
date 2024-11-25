@@ -2,8 +2,10 @@
 #include "debug.hpp"
 #include <godot_cpp/variant/utility_functions.hpp>
 
-ReplMediator::ReplMediator(godot::Ref<godot::TCPServer> server) :
-    server(server) {
+using namespace godot;
+
+ReplMediator::ReplMediator(Ref<TCPServer> server, Callable reply) :
+  server(server), reply(reply) {
   node_registry = std::make_shared<ReplNodeRegistry>();
 }
 
@@ -38,7 +40,7 @@ bool ReplMediator::mediate(MessageQueue &queue) {
   }
 
   for (auto connection = connections.begin(); connection != connections.end();) {
-    auto status = connection->process_with(request_compiler);
+    auto status = connection->process_with(request_compiler, reply);
     if (status == ReplConnection::DISCONNECTED) {
       connection = connections.erase(connection);
       gd::print("Scheme repl client disconnected.");
