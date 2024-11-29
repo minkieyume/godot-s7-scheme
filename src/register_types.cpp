@@ -35,11 +35,11 @@ static SchemeReplServer *repl_server;
 void initialize_server_types() {
   GDREGISTER_CLASS(SchemeReplServer);
   repl_server = memnew(SchemeReplServer);
-  repl_server->init();
+  repl_server->start();
 }
 
 void uninitialize_server_types() {
-  repl_server->finish();
+  repl_server->stop();
   memdelete(repl_server);
 }
 

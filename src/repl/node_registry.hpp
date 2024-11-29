@@ -2,8 +2,8 @@
 #define GODOT_S7_SCHEME_REPL_NODE_REGISTRY_HPP
 
 #include <godot_cpp/variant/string.hpp>
-#include <vector>
 #include <optional>
+#include <vector>
 
 class ReplNodeRegistry {
 public:
@@ -14,7 +14,7 @@ public:
 
   std::optional<NodeRecord> get_most_recent();
   std::vector<godot::String> get_available_node_names();
-  void register_node(uint64_t node_id, godot::String node_name);
+  void register_node(uint64_t node_id, godot::String &&node_name);
   void unregister_node(uint64_t node_id);
 
 private:

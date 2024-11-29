@@ -3,8 +3,9 @@
 
 #include "../s7.hpp"
 #include <godot_cpp/variant/packed_byte_array.hpp>
+#include <godot_cpp/variant/string.hpp>
 
-typedef std::pair<const char *, const char *> error_output_and_response;
+using error_output_and_response = std::pair<godot::String, godot::String>;
 
 class ReplRequestCompiler {
 public:
@@ -13,7 +14,7 @@ public:
 
 public:
   error_output_and_response compile_request(const godot::PackedByteArray &request);
-  error_output_and_response eval(const char* compiled_request);
+  godot::String eval(const godot::String& compiled_request);
 
 private:
   s7_protected_ptr compile_geiser_request;

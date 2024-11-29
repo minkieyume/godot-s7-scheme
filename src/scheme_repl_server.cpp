@@ -1,5 +1,6 @@
 #include "scheme_repl_server.hpp"
 #include "repl/mediator.hpp"
+#include "scheme.hpp"
 #include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
@@ -11,21 +12,21 @@ void SchemeReplServer::publish_node(const Scheme *node) {
     return;
   }
   auto node_name = node->get_path().slice(-2).get_concatenated_names();
-  message_queue.push(std::move(ReplMessage::publish_node(std::move(node_name), node->get_instance_id())));
+  message_queue.push(ReplMessage::publish_node(std::move(node_name), node->get_instance_id()));
 }
 
 void SchemeReplServer::unpublish_node(const Scheme *node) {
   if (thread.is_null()) {
     return;
   }
-  message_queue.push(std::move(ReplMessage::unpublish_node(node->get_instance_id())));
+  message_queue.push(ReplMessage::unpublish_node(node->get_instance_id()));
 }
 
-void SchemeReplServer::reply(Variant result, uint64_t request_id) {
+void SchemeReplServer::reply(String result, uint64_t connection_id) {
   if (thread.is_null()) {
     return;
   }
-  message_queue.push(std::move(ReplMessage::eval_response(request_id, std::move(result))));
+  message_queue.push(ReplMessage::eval_response(connection_id, std::move(result)));
 }
 
 void SchemeReplServer::server_loop(int tcp_port, const String &tcp_bind_address) {
@@ -51,11 +52,9 @@ void SchemeReplServer::server_loop(int tcp_port, const String &tcp_bind_address)
 std::optional<std::pair<uint16_t, String>> parse_repl_args() {
   // TODO: accept --s7-tcp-address=<address>
   String tcp_bind_address = "127.0.0.1";
-
-  auto args = OS::get_singleton()->get_cmdline_args();
-  for (auto arg = args.begin(); arg != args.end(); ++arg) {
-    if (arg->begins_with("--s7-tcp-port")) {
-      auto parts = arg->split("=");
+  for (const auto &arg : OS::get_singleton()->get_cmdline_args()) {
+    if (arg.begins_with("--s7-tcp-port")) {
+      auto parts = arg.split("=");
       auto tcp_port = parts.size() > 1 ? parts[1].to_int() : 0;
       return std::make_pair(tcp_port, tcp_bind_address);
     }
@@ -63,7 +62,7 @@ std::optional<std::pair<uint16_t, String>> parse_repl_args() {
   return std::nullopt;
 }
 
-Error SchemeReplServer::init() {
+Error SchemeReplServer::start() {
   ERR_FAIL_COND_V_MSG(thread.is_valid(), ERR_BUG, "Scheme repl server can only be started once!");
 
   auto repl_args = parse_repl_args();
@@ -71,8 +70,7 @@ Error SchemeReplServer::init() {
     return Error::OK;
   }
 
-  int tcp_port = repl_args->first;
-  const String &tcp_bind_address = repl_args->second;
+  const auto &[tcp_port, tcp_bind_address] = *repl_args;
 
   exit_thread = false;
   thread.instantiate();
@@ -81,7 +79,7 @@ Error SchemeReplServer::init() {
       Thread::PRIORITY_LOW);
 }
 
-void SchemeReplServer::finish() {
+void SchemeReplServer::stop() {
   if (thread.is_null()) {
     return;
   }

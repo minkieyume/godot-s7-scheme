@@ -12,9 +12,9 @@ private:
   std::mutex mutex;
 
 public:
-  void push(T item) {
+  void push(T&& item) {
     std::lock_guard<std::mutex> lock(mutex);
-    queue.push(std::move(item));
+    queue.emplace(std::move(item));
   }
 
   std::optional<T> pop() {
@@ -24,7 +24,7 @@ public:
     }
     T item = std::move(queue.front());
     queue.pop();
-    return std::move(item);
+    return item;
   }
 };
 #endif

@@ -83,7 +83,7 @@ Variant Scheme::eval(const String &code) {
 }
 
 void Scheme::eval_async(const String &code, const Callable &continuation) {
-  auto result = eval(code);
+  auto result = scheme_object_to_godot_string(scheme.get(), scheme.eval(code));
   continuation.call_deferred(result);
 }
 

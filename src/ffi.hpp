@@ -1,7 +1,7 @@
 #ifndef GODOT_S7_SCHEME_FFI_H
 #define GODOT_S7_SCHEME_FFI_H
 
-#include <s7.hpp>
+#include "s7.hpp"
 
 namespace godot {
 void define_variant_ffi(s7 &s7);

@@ -2,11 +2,12 @@
 #define GODOT_S7_SCHEME_SCHEME_REPL_SERVER_H
 
 #include "repl/mediator.hpp"
-#include "scheme.hpp"
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/thread.hpp>
 
 namespace godot {
+
+class Scheme;
 
 class SchemeReplServer : public Object {
   GDCLASS(SchemeReplServer, Object);
@@ -15,18 +16,18 @@ public: // public API
   static SchemeReplServer *get_singleton();
   void publish_node(const Scheme *node);
   void unpublish_node(const Scheme *node);
-  void reply(Variant result, uint64_t request_id);
+  void reply(String result, uint64_t connection_id);
 
 private:
   static SchemeReplServer *singleton;
-  mutable bool exit_thread;
+  bool exit_thread;
   Ref<Thread> thread;
   ReplMediator::MessageQueue message_queue;
 
-public:
+public: // extension initialization API
   SchemeReplServer();
-  Error init();
-  void finish();
+  Error start();
+  void stop();
 
 protected:
   static void _bind_methods();

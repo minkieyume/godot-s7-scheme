@@ -60,9 +60,7 @@ void s7::load_string(const String &str) const {
 }
 
 s7_pointer s7::eval(const String &code) const {
-  auto sc = get();
-  auto str = code.utf8();
-  return s7_eval_c_string(sc, str);
+  return s7_eval_c_string(get(), code.utf8());
 }
 
 s7_pointer s7::define(const char *name, s7_pointer value, const char *help) const {
