@@ -14,9 +14,9 @@
 #define LOG_CALL() (std::cout << __func__ << ":" << __LINE__ << std::endl)
 
 s7_pointer watch_s7_value(
-		s7_scheme *sc, const char *func, int line, const char *e, s7_pointer v);
+    s7_scheme *sc, const char *func, int line, const char *e, s7_pointer v);
 const godot::Variant &watch_variant(
-		const char *func, int line, const char *e, const godot::Variant &v);
+    const char *func, int line, const char *e, const godot::Variant &v);
 
 #else
 #define WATCH(e) 0

@@ -8,21 +8,21 @@
 
 namespace godot {
 class Scheme : public Node {
-	GDCLASS(Scheme, Node)
+  GDCLASS(Scheme, Node)
 
 public:
-	Scheme();
-	~Scheme() override;
+  Scheme();
+  ~Scheme() override;
 
-	void _ready() override;
-	void _process(double delta) override;
+  void _ready() override;
+  void _process(double delta) override;
   void _enter_tree() override;
-	void _exit_tree() override;
+  void _exit_tree() override;
 
-	void define(const String &name, const Variant &value, const String &help = "") const;
-	void load(const SchemeScript *script) const;
-	void load_string(const String &code) const;
-	Variant eval(const String &code);
+  void define(const String &name, const Variant &value, const String &help = "") const;
+  void load(const SchemeScript *script) const;
+  void load_string(const String &code) const;
+  Variant eval(const String &code);
   /**
    * Process an async evaluation request from repl and calls [continuation] with the result.
    */
@@ -43,10 +43,10 @@ private:
   void load_script();
 
 private:
-	TypedArray<SchemeScript> prelude;
-	Ref<SchemeScript> scheme_script;
-	s7_protected_ptr _process_symbol;
-	s7 scheme;
+  TypedArray<SchemeScript> prelude;
+  Ref<SchemeScript> scheme_script;
+  s7_protected_ptr _process_symbol;
+  s7 scheme;
 };
 
 } // namespace godot
