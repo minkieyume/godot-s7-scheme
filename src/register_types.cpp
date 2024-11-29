@@ -77,7 +77,7 @@ GDExtensionBool GDE_EXPORT godot_s7_scheme_library_init(
   GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
   init_obj.register_initializer(initialize_gdextension_types);
   init_obj.register_terminator(uninitialize_gdextension_types);
-  init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_EDITOR);
+  init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
 
   return init_obj.init();
 }
