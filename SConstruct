@@ -32,7 +32,7 @@ const char* {constant_name} = R"({file_content})";
 """)
 
 def is_submodule_initialized(path):
-  return os.path.isdir(path) and os.listdir(path)
+    return os.path.isdir(path) and os.listdir(path)
 
 # -------------------------- Build definition --------------------------
 
@@ -64,15 +64,23 @@ env.Append(
         "DISABLE_AUTOLOAD": "1",
         "WITH_C_LOADER": "0",
         "WITH_MULTITHREAD_CHECKS": "0",
-        "WITH_SYSTEM_EXTRAS": "0",
-        "HAVE_COMPLEX_NUMBERS": "0" if env["platform"] == "windows" else "1"
+        "WITH_SYSTEM_EXTRAS": "0"
     }
 )
 
+s7_env = env.Clone()
+s7_obj = s7_env.SharedObject(target='s7', source='s7/s7.c')
+if s7_env["platform"] == "windows":
+    s7_env.Append(
+        CCFLAGS=['/std:c17'],
+        CPPDEFINES={
+            "HAVE_COMPLEX_NUMBERS": "0"
+        }
+    )
+
 sources = [
     Glob("src/*.cpp"),
-    Glob("src/repl/*.cpp"),
-    Glob("s7/s7.c")
+    Glob("src/repl/*.cpp")
 ]
 
 if env["target"] in ["editor", "template_debug"]:
@@ -92,7 +100,7 @@ if env["platform"] == "macos" or env["platform"] == "ios":
 library_file = "bin/{}/{}{}".format(env["platform"], file_path, file)
 library = env.SharedLibrary(
     library_file,
-    source=sources,
+    source=sources + [s7_obj],
 )
 
 copy = env.InstallAs("{}/bin/{}/{}lib{}".format(project_dir, env["platform"], file_path, file), library)
