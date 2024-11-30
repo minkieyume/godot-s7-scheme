@@ -8,7 +8,7 @@
 
 (define (godot scene)
   (let* ((program (or (getenv "GODOT") "godot"))
-         (cmd (format #f "~a --path demo ~a --headless --quit" program scene)))
+         (cmd (format #f "\"~a\" --path demo ~a --headless --quit" program scene)))
     (format #t "~a~%" cmd)
     (system cmd #t)))
 
