@@ -2,10 +2,11 @@
 #include "s7.hpp"
 #include "debug_macros.hpp"
 #include <godot_cpp/variant/utility_functions.hpp>
-#include <mutex>
 #include <vector>
 
-class godot::s7_scheme_context {
+using namespace godot;
+
+class s7_scheme_context {
 public:
   void print_error(uint8_t char_code) {
     if (char_code == '\n') {
@@ -23,8 +24,6 @@ public:
 private:
   std::vector<uint8_t> error_buffer;
 };
-
-using namespace godot;
 
 void add_scheme_mapping(s7_scheme *sc, s7_scheme_context *scheme) {
   s7_define_constant(sc, "*ctx*", s7_make_c_pointer(sc, scheme));
@@ -61,9 +60,7 @@ void s7::load_string(const String &str) const {
 }
 
 s7_pointer s7::eval(const String &code) const {
-  auto sc = get();
-  auto str = code.utf8();
-  return s7_eval_c_string(sc, str);
+  return s7_eval_c_string(get(), code.utf8());
 }
 
 s7_pointer s7::define(const char *name, s7_pointer value, const char *help) const {
@@ -71,8 +68,7 @@ s7_pointer s7::define(const char *name, s7_pointer value, const char *help) cons
   return s7_define_variable_with_documentation(sc, name, value, help);
 }
 
-s7_pointer s7::define_constant_with_documentation(
-    const char *name, s7_pointer value, const char *help) const {
+s7_pointer s7::define_constant_with_documentation(const char *name, s7_pointer value, const char *help) const {
   auto sc = get();
   return s7_define_constant_with_documentation(sc, name, value, help);
 }

@@ -9,7 +9,8 @@ class SchemeScript : public Resource {
 
 public:
   SchemeScript();
-  SchemeScript(const String &code) : code(code) {}
+  SchemeScript(const String &code) :
+      code(code) {}
   ~SchemeScript();
 
   const String &get_code() const { return code; }
