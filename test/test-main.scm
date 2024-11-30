@@ -7,8 +7,10 @@
          (error 'assertion-error "ERROR~%# (assert-equals ~a ~a)~%## ~a~%`~a`~%## ~a~%`~a`" lq rq lq l' rq r')))))
 
 (define (godot scene)
-  (let ((program (or (getenv "GODOT") "godot")))
-    (system (format #f "~a --path demo ~a --headless --quit" program scene) #t)))
+  (let* ((program (or (getenv "GODOT") "godot"))
+         (cmd (format #f "~a --path demo ~a --headless --quit" program scene)))
+    (format #t "~a~%" cmd)
+    (system cmd #t)))
 
 (define (read-file path)
   (call-with-input-file path
