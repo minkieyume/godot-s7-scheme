@@ -19,6 +19,15 @@ std::vector<String> ReplNodeRegistry::get_available_node_names() {
   return result;
 }
 
+std::optional<ReplNodeRegistry::NodeRecord> ReplNodeRegistry::find_node_by_name(const String& node_name) {
+  for (const auto &node : nodes) {
+    if (node.node_name == node_name) {
+      return node;
+    }
+  }
+  return std::nullopt;
+}
+
 void ReplNodeRegistry::register_node(uint64_t node_id, String &&node_name) {
   DEBUG_REPL("Scheme node ", node_name, " is available for repl interaction.");
   nodes.emplace_back(NodeRecord{ node_id, std::move(node_name) });

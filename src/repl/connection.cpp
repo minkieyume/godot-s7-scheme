@@ -1,5 +1,6 @@
 #include "connection.hpp"
 #include "debug.hpp"
+#include <cstring>
 
 using namespace godot;
 
@@ -70,13 +71,29 @@ ReplConnection::Status ReplConnection::process_with(Context &context) {
       : ReplConnection::IDLE;
 }
 
+template <typename B, size_t N>
+bool buffer_contains(const char (&str)[N], B buffer) {
+  constexpr size_t strlen = N - 1;
+  return buffer.size() == strlen && std::strncmp((const char *)buffer.ptr(), str, strlen) == 0;
+}
+
+template <typename B, size_t N>
+bool buffer_starts_with(const char (&str)[N], B buffer) {
+  constexpr size_t strlen = N - 1;
+  return buffer.size() >= strlen && std::strncmp((const char *)buffer.ptr(), str, strlen) == 0;
+}
+
 bool ReplConnection::process_buffer_with(Context &context) {
-  if (buffer.size() == 2 && buffer.get_string_from_utf8() == ",q") {
+  if (buffer_contains(",q", buffer)) {
     // disconnection from repl
     return false;
   }
-  if (buffer.size() == 3 && buffer.get_string_from_utf8() == ",ls") {
+  if (buffer_contains(",ls", buffer)) {
     send_available_nodes();
+    return true;
+  }
+  if (buffer_starts_with(",enter ", buffer)) {
+    enter_selected_node(buffer.get_string_from_utf8().substr(7));
     return true;
   }
 
@@ -85,10 +102,23 @@ bool ReplConnection::process_buffer_with(Context &context) {
 }
 
 void ReplConnection::send_available_nodes() {
-  auto node_paths = node_registry->get_available_node_names();
-  for (const auto &path : node_paths) {
-    send(path);
-    send('\n');
+  auto sent = 0;
+  for (const auto &node_name : node_registry->get_available_node_names()) {
+    if (sent++ > 0) {
+      send('\n');
+    }
+    send(node_name);
+  }
+  send_prompt();
+}
+
+void ReplConnection::enter_selected_node(const String &node_name) {
+  auto found = node_registry->find_node_by_name(node_name);
+  if (found) {
+    target_node = found;
+    send("Connected to `" + node_name + "`.");
+  } else {
+    send("Node `" + node_name + "` not found.");
   }
   send_prompt();
 }

@@ -14,6 +14,7 @@ public:
 
   std::optional<NodeRecord> get_most_recent();
   std::vector<godot::String> get_available_node_names();
+  std::optional<NodeRecord> find_node_by_name(const godot::String& node_name);
   void register_node(uint64_t node_id, godot::String &&node_name);
   void unregister_node(uint64_t node_id);
 

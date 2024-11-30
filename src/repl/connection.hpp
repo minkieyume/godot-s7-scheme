@@ -44,6 +44,7 @@ private:
   bool process_buffer_with(Context &context);
   void process_eval_request_with(Context &context);
   void send_available_nodes();
+  void enter_selected_node(const godot::String &node_name);
 
 private:
   godot::Ref<godot::StreamPeerTCP> tcp_stream;
