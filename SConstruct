@@ -72,10 +72,7 @@ s7_env = env.Clone()
 s7_obj = s7_env.SharedObject(target='s7', source='s7/s7.c')
 if s7_env["platform"] == "windows":
     s7_env.Append(
-        CCFLAGS=['/std:c17'],
-        CPPDEFINES={
-            "HAVE_COMPLEX_NUMBERS": "0"
-        }
+        CCFLAGS=['/std:c17']
     )
 
 sources = [
