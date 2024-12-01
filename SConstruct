@@ -57,29 +57,29 @@ Run the following command to download godot-cpp:
     sys.exit(1)
 
 env = SConscript("godot-cpp/SConstruct", {"env": local_env.Clone(), "customs": customs})
-env.Append(
-    CPPPATH=["src/", "s7/"],
+x_env = env.Clone()
+x_env.Append(
     CPPDEFINES={
         "DISABLE_DEPRECATED": "1",
         "DISABLE_AUTOLOAD": "1",
         "WITH_C_LOADER": "0",
         "WITH_MULTITHREAD_CHECKS": "0",
-        "WITH_SYSTEM_EXTRAS": "0"
+        "WITH_SYSTEM_EXTRAS": "0",
+#        "HAVE_COMPLEX_NUMBERS": "1",
+#        "HAVE_COMPLEX_TRIG": "1"
     }
 )
 
-s7_env = env.Clone()
-s7_obj = s7_env.SharedObject(target='s7', source='s7/s7.c')
+s7_env = x_env.Clone()
+s7_obj = s7_env.SharedObject('s7/s7.c')
 if s7_env["platform"] == "windows":
     s7_env.Append(
         CCFLAGS=['/std:c17']
     )
-
 sources = [
     Glob("src/*.cpp"),
     Glob("src/repl/*.cpp")
 ]
-
 if env["target"] in ["editor", "template_debug"]:
     try:
         doc_data = env.GodotCPPDocData("src/gen/doc_data.gen.cpp", source=Glob("doc_classes/*.xml"))
@@ -95,9 +95,13 @@ if env["platform"] == "macos" or env["platform"] == "ios":
     file = "{}.{}.{}".format(lib_name, env["platform"], env["target"])
 
 library_file = "bin/{}/{}{}".format(env["platform"], file_path, file)
+
+x_env.Append(CPPPATH=["s7/"])
+x_lib = x_env.SharedObject(sources)
+
 library = env.SharedLibrary(
     library_file,
-    source=sources + [s7_obj],
+    source=[x_lib, s7_obj],
 )
 
 copy = env.InstallAs("{}/bin/{}/{}lib{}".format(project_dir, env["platform"], file_path, file), library)
