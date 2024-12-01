@@ -70,7 +70,7 @@ good candidate for an entry in your project's .dir-locals.el."
   :type 'boolean)
 
 (geiser-custom--defcustom geiser-godot-s7-manual-lookup-nodes
-    '("godotengine")
+  '("godotengine")
   "List of info nodes that, when present, are used for manual lookups."
   :type '(repeat string))
 
@@ -80,7 +80,7 @@ good candidate for an entry in your project's .dir-locals.el."
 (defun geiser-godot-s7--binary ()
   "Return the name of the Godot s7 binary to execute."
   (if (listp geiser-godot-s7-binary)
-      (car geiser-godot-s7-binary)
+    (car geiser-godot-s7-binary)
     geiser-godot-s7-binary))
 
 (defvar geiser-godot-s7--conn-address "9998")
@@ -101,9 +101,9 @@ good candidate for an entry in your project's .dir-locals.el."
   "Transform PROC in string for a scheme procedure using ARGS."
   (cl-case proc
     ((eval compile) (format ",geiser-eval %s %s%s"
-                            (or (car args) "#f")
-                            (geiser-godot-s7--linearize-args (cdr args))
-                            (if (cddr args) "" " ()")))
+                      (or (car args) "#f")
+                      (geiser-godot-s7--linearize-args (cdr args))
+                      (if (cddr args) "" " ()")))
     ((load-file compile-file) (format ",geiser-load-file %s" (car args)))
     ((no-values) ",geiser-no-values")
     (t (format "ge:%s (%s)" proc (geiser-godot-s7--linearize-args args)))))
@@ -119,8 +119,8 @@ good candidate for an entry in your project's .dir-locals.el."
   "Use FMT to format a change to MODULE, with default DEF."
   (when module
     (let* ((module (geiser-godot-s7--get-module module))
-           (module (cond ((or (null module) (eq module :f)) def)
-                         (t (format "%s" module)))))
+            (module (cond ((or (null module) (eq module :f)) def)
+                      (t (format "%s" module)))))
       (and module (format fmt module)))))
 
 (defun geiser-godot-s7--import-command (module)
@@ -138,8 +138,8 @@ good candidate for an entry in your project's .dir-locals.el."
 (defun geiser-godot-s7--symbol-begin (module)
   "Find beginning of symbol in the context of MODULE."
   (if module
-      (max (save-excursion (beginning-of-line) (point))
-           (save-excursion (skip-syntax-backward "^(>") (1- (point))))
+    (max (save-excursion (beginning-of-line) (point))
+      (save-excursion (skip-syntax-backward "^(>") (1- (point))))
     (save-excursion (skip-syntax-backward "^'-()>") (point))))
 
 
@@ -154,20 +154,20 @@ good candidate for an entry in your project's .dir-locals.el."
 
 (defun geiser-godot-s7--find-file (file)
   (or (gethash file geiser-godot-s7--file-cache)
-      (with-current-buffer (or geiser-debug--sender-buffer (current-buffer))
-        (when-let (r geiser-repl--repl)
-          (with-current-buffer r
-            (geiser-eval--send/result `(:eval (:ge find-file ,file))))))))
+    (with-current-buffer (or geiser-debug--sender-buffer (current-buffer))
+      (when-let (r geiser-repl--repl)
+        (with-current-buffer r
+          (geiser-eval--send/result `(:eval (:ge find-file ,file))))))))
 
 (defun geiser-godot-s7--resolve-file (file)
   "Find the given FILE, if it's indeed a file."
   (when (and (stringp file)
-             (not (member file
-                          '("socket" "stdin" "unknown file" "current input"))))
+          (not (member file
+                 '("socket" "stdin" "unknown file" "current input"))))
     (message "Resolving %s" file)
     (cond ((file-name-absolute-p file) file)
-          (t (when-let (f (geiser-godot-s7--find-file file))
-               (puthash file f geiser-godot-s7--file-cache))))))
+      (t (when-let (f (geiser-godot-s7--find-file file))
+           (puthash file f geiser-godot-s7--file-cache))))))
 
 (defun geiser-godot-s7--resolve-file-x ()
   "Check if last match contain a resolvable file."
@@ -179,11 +179,11 @@ good candidate for an entry in your project's .dir-locals.el."
 
 (defun geiser-godot-s7--set-up-error-links ()
   (setq-local compilation-error-regexp-alist
-              `((,geiser-godot-s7--path-rx geiser-godot-s7--resolve-file-x)
-                ("^  +\\([0-9]+\\):\\([0-9]+\\)" nil 1 2)
-                ("^\\(/.*\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2 3)))
+    `((,geiser-godot-s7--path-rx geiser-godot-s7--resolve-file-x)
+       ("^  +\\([0-9]+\\):\\([0-9]+\\)" nil 1 2)
+       ("^\\(/.*\\):\\([0-9]+\\):\\([0-9]+\\)" 1 2 3)))
   (font-lock-add-keywords nil
-                          `((,geiser-godot-s7--path-rx 1 compilation-error-face))))
+    `((,geiser-godot-s7--path-rx 1 compilation-error-face))))
 
 (defun geiser-godot-s7--display-error (_module _key msg)
   "Display error with given message MSG."
@@ -277,27 +277,27 @@ Start a Scheme Repl in the active Godot s7 scene."
 (defun geiser-godot-s7--info-spec ()
   "Return info specification for given NODES."
   (let* ((nrx "^[       ]+-+ [^:]+:[    ]*")
-         (drx "\\b")
-         (res (when (Info-find-file "r5rs" t)
-                `(("(r5rs)Index" nil ,nrx ,drx)))))
+          (drx "\\b")
+          (res (when (Info-find-file "r5rs" t)
+                 `(("(r5rs)Index" nil ,nrx ,drx)))))
     (dolist (node geiser-godot-s7-manual-lookup-nodes res)
       (when (Info-find-file node t)
         (mapc (lambda (idx)
                 (add-to-list 'res
-                             (list (format "(%s)%s" node idx) nil nrx drx)))
-              '("R5RS Index" "Concept Index" "Procedure Index" "Variable Index", "Index"))))))
+                  (list (format "(%s)%s" node idx) nil nrx drx)))
+          '("R5RS Index" "Concept Index" "Procedure Index" "Variable Index", "Index"))))))
 
 (info-lookup-add-help :topic 'symbol
-                      :mode 'geiser-godot-s7-mode
-                      :ignore-case nil
-                      :regexp "[^()`',\"        \n]+"
-                      :doc-spec (geiser-godot-s7--info-spec))
+  :mode 'geiser-godot-s7-mode
+  :ignore-case nil
+  :regexp "[^()`',\"        \n]+"
+  :doc-spec (geiser-godot-s7--info-spec))
 
 (defun geiser-godot-s7--info-lookup (id)
   (cond ((null id) (info "godotengine"))
-        ((ignore-errors (info-lookup-symbol (format "%s" id) 'geiser-godot-s7-mode) t))
-        ((and (listp id) (geiser-godot-s7--info-lookup (car (last id)))))
-        (t (geiser-godot-s7--info-lookup (when (listp id) (butlast id))))))
+    ((ignore-errors (info-lookup-symbol (format "%s" id) 'geiser-godot-s7-mode) t))
+    ((and (listp id) (geiser-godot-s7--info-lookup (car (last id)))))
+    (t (geiser-godot-s7--info-lookup (when (listp id) (butlast id))))))
 
 (defun geiser-godot-s7--manual-look-up (id _mod)
   "Look for ID in the Godot s7 manuals."
@@ -326,27 +326,27 @@ Start a Scheme Repl in the active Godot s7 scene."
 ;;; Implementation definition:
 
 (define-geiser-implementation godot-s7
-                              (binary geiser-godot-s7--binary)
-                              (arglist geiser-godot-s7--parameters)
-                              (version-command geiser-godot-s7--version)
-                              (minimum-version geiser-godot-s7-minimum-version)
-                              (repl-startup geiser-godot-s7--startup)
-                              (prompt-regexp geiser-godot-s7--prompt-regexp)
-                              (clean-up-output geiser-godot-s7--clean-up-output)
-                              (debugger-prompt-regexp nil)
-                              (enter-debugger nil)
-                              (marshall-procedure geiser-godot-s7--geiser-procedure)
-                              (find-module geiser-godot-s7--get-module)
-                              (enter-command geiser-godot-s7--enter-command)
-                              (exit-command geiser-godot-s7--exit-command)
-                              (import-command geiser-godot-s7--import-command)
-                              (find-symbol-begin geiser-godot-s7--symbol-begin)
-                              (display-error geiser-godot-s7--display-error)
-                              (external-help nil)
-                              (check-buffer geiser-godot-s7--guess)
-                              (keywords geiser-godot-s7--keywords)
-                              (case-sensitive :t)
-                              (unsupported '(callers callees)))
+  (binary geiser-godot-s7--binary)
+  (arglist geiser-godot-s7--parameters)
+  (version-command geiser-godot-s7--version)
+  (minimum-version geiser-godot-s7-minimum-version)
+  (repl-startup geiser-godot-s7--startup)
+  (prompt-regexp geiser-godot-s7--prompt-regexp)
+  (clean-up-output geiser-godot-s7--clean-up-output)
+  (debugger-prompt-regexp nil)
+  (enter-debugger nil)
+  (marshall-procedure geiser-godot-s7--geiser-procedure)
+  (find-module geiser-godot-s7--get-module)
+  (enter-command geiser-godot-s7--enter-command)
+  (exit-command geiser-godot-s7--exit-command)
+  (import-command geiser-godot-s7--import-command)
+  (find-symbol-begin geiser-godot-s7--symbol-begin)
+  (display-error geiser-godot-s7--display-error)
+  (external-help nil)
+  (check-buffer geiser-godot-s7--guess)
+  (keywords geiser-godot-s7--keywords)
+  (case-sensitive :t)
+  (unsupported '(callers callees)))
 
 ;;;###autoload
 (geiser-activate-implementation 'godot-s7)
