@@ -30,7 +30,7 @@ void uninitialize_scene_types() {
   script_loader.unref();
 }
 
-static SchemeReplServer *repl_server;
+static SchemeReplServer *repl_server = nullptr;
 
 void initialize_server_types() {
   GDREGISTER_CLASS(SchemeReplServer);

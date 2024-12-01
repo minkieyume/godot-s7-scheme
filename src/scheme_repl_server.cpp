@@ -90,7 +90,7 @@ void SchemeReplServer::stop() {
   thread.unref();
 }
 
-SchemeReplServer *SchemeReplServer::singleton = NULL;
+SchemeReplServer *SchemeReplServer::singleton = nullptr;
 
 SchemeReplServer *SchemeReplServer::get_singleton() {
   return singleton;
@@ -98,6 +98,10 @@ SchemeReplServer *SchemeReplServer::get_singleton() {
 
 SchemeReplServer::SchemeReplServer() {
   singleton = this;
+}
+
+SchemeReplServer::~SchemeReplServer() {
+  singleton = nullptr;
 }
 
 void SchemeReplServer::_bind_methods() {

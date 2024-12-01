@@ -25,12 +25,15 @@ void Scheme::_process(double delta) {
 }
 void Scheme::_enter_tree() {
   // TODO: move initialization here
-  SchemeReplServer::get_singleton()->publish_node(this);
+  auto server = SchemeReplServer::get_singleton();
+  if (server) server->publish_node(this);
+
   Node::_enter_tree();
 }
 
 void Scheme::_exit_tree() {
-  SchemeReplServer::get_singleton()->unpublish_node(this);
+  auto server = SchemeReplServer::get_singleton();
+  if (server) server->unpublish_node(this);
 
   if (_process_symbol) {
     auto _ = scheme.call_optional("_exit_tree");

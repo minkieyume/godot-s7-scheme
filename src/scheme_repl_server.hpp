@@ -26,6 +26,7 @@ private:
 
 public: // extension initialization API
   SchemeReplServer();
+  ~SchemeReplServer();
   Error start();
   void stop();
 
