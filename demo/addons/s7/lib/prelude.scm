@@ -42,8 +42,7 @@
 (define (require . symbols)
   "Loads a library from addons/s7/lib if it hasn't been loaded yet."
   (for-each
-   (lambda (symbol)
-     (when (not (provided? symbol))
-       (load-library (symbol->string symbol))))
-   symbols))
-
+    (lambda (symbol)
+      (when (not (provided? symbol))
+        (load-library (symbol->string symbol))))
+    symbols))

@@ -203,49 +203,52 @@ good candidate for an entry in your project's .dir-locals.el."
 ;;; Keywords and syntax
 
 (defconst geiser-godot-s7--builtin-keywords
-  '("call-with-input-file"
-    "call-with-input-string"
-    "call-with-output-file"
-    "call-with-output-string"
-    "with-output-to-string"
-    "define*"
-    "define-macro*"
-    "define-bacro"
-    "define-bacro*"
-    "define-constant"
-    "lambda*"
-    "set!"
-    "call!"
-    "inc!"
-    "connect!"
-    "disconnect!"
-    "$"
-    "require"
-    "provide"
-    "import"
-    "import-class"
-    "define-signal"
-    ))
+  '(
+     "call-with-input-file"
+     "call-with-input-string"
+     "call-with-output-file"
+     "call-with-output-string"
+     "with-output-to-string"
+     "define*"
+     "define-macro*"
+     "define-bacro"
+     "define-bacro*"
+     "define-constant"
+     "for-each"
+     "lambda*"
+     "set!"
+     "call!"
+     "inc!"
+     "connect!"
+     "disconnect!"
+     "$"
+     "require"
+     "provide"
+     "import"
+     "import-class"
+     "define-signal"
+     ))
 
 (defun geiser-godot-s7--keywords ()
   "Return Godot s7-specific scheme keywords."
   (append
-   (geiser-syntax--simple-keywords geiser-godot-s7-extra-keywords)
-   (geiser-syntax--simple-keywords geiser-godot-s7--builtin-keywords)))
+    (geiser-syntax--simple-keywords geiser-godot-s7-extra-keywords)
+    (geiser-syntax--simple-keywords geiser-godot-s7--builtin-keywords)))
 
 (geiser-syntax--scheme-indent
- (call-with-input-string 1)
- (call-with-output-string 0)
- (call-with-exit 0)
- (define* 1)
- (define-macro* 1)
- (define-bacro 1)
- (define-bacro* 1)
- (lambda* 1)
- (doto 1)
- (with-let 1)
- (when-let 1)
- (with-output-to-string 0))
+  (call-with-input-string 1)
+  (call-with-output-string 0)
+  (call-with-exit 0)
+  (define* 1)
+  (define-macro* 1)
+  (define-bacro 1)
+  (define-bacro* 1)
+  (lambda* 1)
+  (doto 1)
+  (for-each 0)
+  (with-let 1)
+  (when-let 1)
+  (with-output-to-string 0))
 
 
 ;;; REPL startup
