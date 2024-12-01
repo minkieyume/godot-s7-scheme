@@ -22,7 +22,7 @@ func apply(symbol: String, args: Array):
   return r
 
 func can_exchange_primitive_values():
-  eval("(format #t \"Hello from Scheme!\n\")")
+  eval("(format #f \"Hello from Scheme!~%\")")
 
   define("an-integer", 41)
   eval("an-integer")
