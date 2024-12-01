@@ -1,8 +1,6 @@
 Godot Engine v4.3.stable.official.77dcf97d8 - https://godotengine.org
 
-Hello from Scheme!
-(format #t "Hello from Scheme!
-")=>String(Hello from Scheme!
+(format #f "Hello from Scheme!~%")=>String(Hello from Scheme!
 )
 an-integer=>int(41)
 (+ 1 an-integer)=>int(42)

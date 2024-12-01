@@ -78,7 +78,7 @@ runs:
         emcc -v
 # Windows only
     - name: Windows - Setup MinGW for Windows/MinGW build
-      uses: egor-tensin/setup-mingw@v2
+      uses: egor-tensin/setup-mingw@v2.2.0
       if: ${{ inputs.platform == 'windows' }}
       with:
         version: 12.2.0

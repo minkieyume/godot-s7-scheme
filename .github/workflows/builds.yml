@@ -21,17 +21,17 @@ jobs:
             target-type: template_debug
             os: ubuntu-20.04
 
-#         - platform: windows
-#           float-precision: single
-#           arch: x86_32
-#           target-type: template_debug
-#           os: windows-latest
+          - platform: windows
+            float-precision: single
+            arch: x86_32
+            target-type: template_debug
+            os: windows-latest
 
-#         - platform: windows
-#           float-precision: single
-#           arch: x86_64
-#           target-type: template_debug
-#           os: windows-latest
+          - platform: windows
+            float-precision: single
+            arch: x86_64
+            target-type: template_debug
+            os: windows-latest
 
           - platform: macos
             float-precision: single
@@ -144,17 +144,17 @@ jobs:
             target-type: template_debug
             os: ubuntu-20.04
 
-#         - platform: windows
-#           float-precision: double
-#           arch: x86_32
-#           target-type: template_debug
-#           os: windows-latest
+          - platform: windows
+            float-precision: double
+            arch: x86_32
+            target-type: template_debug
+            os: windows-latest
 
-#         - platform: windows
-#           float-precision: double
-#           arch: x86_64
-#           target-type: template_debug
-#           os: windows-latest
+          - platform: windows
+            float-precision: double
+            arch: x86_64
+            target-type: template_debug
+            os: windows-latest
 
           - platform: macos
             float-precision: double
@@ -286,13 +286,16 @@ jobs:
 
 # Test
       - name: Setup Godot Action
-        if: ${{ matrix.float-precision == 'single' && matrix.target-type == 'template_debug' && (matrix.platform == 'linux' || matrix.platform == 'macos' || matrix.platform == 'windows') }}
+        if: ${{ matrix.float-precision == 'single' && matrix.target-type == 'template_debug' && (matrix.platform == 'linux' || matrix.platform == 'macos' || (matrix.platform == 'windows' && matrix.arch == 'x86_64')) }}
         uses: chickensoft-games/setup-godot@v2.1.1
         with:
           version: 4.3.0
           use-dotnet: false
+      - name: Set GODOT_EXE on windows
+        if: ${{ matrix.platform == 'windows' }}
+        run: echo "GODOT_EXE=C:\Users\runneradmin\godot\Godot_v4.3-stable_win64.exe" >> $env:GITHUB_ENV
       - name: Test
-        if: ${{ matrix.float-precision == 'single' && matrix.target-type == 'template_debug' && (matrix.platform == 'linux' || matrix.platform == 'macos' || matrix.platform == 'windows') }}
+        if: ${{ matrix.float-precision == 'single' && matrix.target-type == 'template_debug' && (matrix.platform == 'linux' || matrix.platform == 'macos' || (matrix.platform == 'windows' && matrix.arch == 'x86_64')) }}
         run: make test -j
 
 # Sign

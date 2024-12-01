@@ -7,18 +7,25 @@
          (error 'assertion-error "ERROR~%# (assert-equals ~a ~a)~%## ~a~%`~a`~%## ~a~%`~a`" lq rq lq l' rq r')))))
 
 (define (godot scene)
-  (system (format #f "godot --path demo ~a --headless --quit" scene) #t))
+  (let* ((program (or (getenv "GODOT_EXE") (getenv "GODOT") "godot"))
+         (cmd (format #f "\"~a\" --path demo ~a --headless --quit" program scene)))
+    (format #t "~a~%" cmd)
+    (system cmd #t)))
 
 (define (read-file path)
   (call-with-input-file path
     (lambda (p) (read-string 65535 p))))
 
+(define (diff file1 file2)
+  (system (format #f "diff --strip-trailing-cr --color=auto -u ~a ~a" file1 file2)))
+
 (define* (golden-scene-test scene golden-file)
   (let ((output-file "bin/s7_scheme_tests.txt"))
     (call-with-output-file output-file
       (lambda (p) (write-string (godot scene) p)))
-    (unless (= 0 (system (format #f "diff --color=auto -u ~a ~a" golden-file output-file)))
-      (error 'assertion-error "ERROR: output of scene `~a` doesn't match golden file `~a`." scene golden-file))))
+    (unless (= 0 (diff golden-file output-file))
+      (error 'assertion-error
+             "ERROR: output of scene `~a` doesn't match golden file `~a`." scene golden-file))))
 
 (define (golden-scene-tests)
   (golden-scene-test
