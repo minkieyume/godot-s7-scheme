@@ -27,6 +27,12 @@ run: demo/.godot
 android:
 	scons platform=android target=template_debug
 
+.PHONY: pack
+
+pack:
+	rsync -rup demo/addons bin/pack
+	rsync -rup bin/android bin/ios bin/linux bin/macos bin/web bin/windows demo/bin/godot-s7-scheme.gdextension bin/pack/bin
+
 .PHONY: test-watch
 
 test-watch:
