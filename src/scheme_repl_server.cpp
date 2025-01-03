@@ -13,21 +13,29 @@ void SchemeReplServer::publish_node(const Scheme *node) {
     return;
   }
   auto node_name = node->get_path().slice(-2).get_concatenated_names();
-  message_queue.push(ReplMessage::publish_node(std::move(node_name), node->get_instance_id()));
+  message_queue.push(
+      ReplMessage::publish_node(
+          std::move(node_name),
+          node->get_instance_id()));
 }
 
 void SchemeReplServer::unpublish_node(const Scheme *node) {
   if (thread.is_null()) {
     return;
   }
-  message_queue.push(ReplMessage::unpublish_node(node->get_instance_id()));
+  message_queue.push(
+      ReplMessage::unpublish_node(
+          node->get_instance_id()));
 }
 
 void SchemeReplServer::reply(String result, uint64_t connection_id) {
   if (thread.is_null()) {
     return;
   }
-  message_queue.push(ReplMessage::eval_response(connection_id, std::move(result)));
+  message_queue.push(
+      ReplMessage::eval_response(
+          connection_id,
+          std::move(result)));
 }
 
 void SchemeReplServer::server_loop(int tcp_port, const String &tcp_bind_address) {
