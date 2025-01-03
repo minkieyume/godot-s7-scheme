@@ -314,8 +314,22 @@ jobs:
           APPLE_DEV_TEAM_ID: ${{ secrets.APPLE_DEV_TEAM_ID }}
           APPLE_DEV_APP_ID: ${{ secrets.APPLE_DEV_APP_ID }}
 
+      - name: Windows - Delete compilation files
+        if: ${{ matrix.platform == 'windows' }}
+        shell: pwsh
+        run: |
+          Remove-Item bin/* -Include *.exp,*.lib,*.pdb -Force
+
       - name: Pack
+        if: ${{ matrix.platform != 'windows' }}
         run: make pack
+
+      - name: Pack - Windows
+        if: ${{ matrix.platform == 'windows' }}
+        run: |
+          New-Item -ItemType Directory -Path "bin/pack"
+          Copy-Item -Recurse -Force -Path "demo/addons" -Destination "bin/pack/"
+          Copy-Item -Recurse -Force -Path "bin/android", "bin/ios", "bin/linux", "bin/macos", "bin/web", "bin/windows", "demo/bin/godot-s7-scheme.gdextension" -Destination "bin/pack/bin/"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
