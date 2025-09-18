@@ -39,7 +39,7 @@ def is_submodule_initialized(path):
 lib_name = "godot-s7-scheme"
 project_dir = "demo"
 
-local_env = Environment(tools=["default"], PLATFORM="")
+local_env = Environment(tools=["default"], PLATFORM="", ENV=os.environ)
 
 customs = ["custom.py"]
 customs = [os.path.abspath(path) for path in customs]
