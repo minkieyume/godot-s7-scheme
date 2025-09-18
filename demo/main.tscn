@@ -1,15 +1,15 @@
 [gd_scene load_steps=4 format=3 uid="uid://dd42y1qp4irg8"]
 
-[ext_resource type="SchemeScript" path="res://main.scm" id="1_4c4e2"]
-[ext_resource type="SchemeScript" path="res://addons/s7/lib/prelude.scm" id="1_r2s6g"]
+[ext_resource type="SchemeScript" uid="uid://de6llvi6nqf3o" path="res://addons/s7/lib/prelude.scm" id="1_r2s6g"]
+[ext_resource type="SchemeScript" uid="uid://816cts7obpso" path="res://play-wrighter.scm" id="2_h2yge"]
 [ext_resource type="Texture2D" uid="uid://dbx66sovxd1" path="res://icon.svg" id="3_lw6r1"]
 
 [node name="Main" type="Node2D"]
 
 [node name="Scheme" type="Scheme" parent="."]
 prelude = Array[SchemeScript]([ExtResource("1_r2s6g")])
-scheme_script = ExtResource("1_4c4e2")
+scheme_script = ExtResource("2_h2yge")
 
 [node name="Sprite2D" type="Sprite2D" parent="Scheme"]
-position = Vector2(567, 359.289)
+position = Vector2(512.623, 280.875)
 texture = ExtResource("3_lw6r1")
